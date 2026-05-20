@@ -1,0 +1,16 @@
+GENE_NAME	Mutation AA	Mutation somatic status	Mutation Description	ID_sample	Primary site	Histology	COSMIC version
+KRAS	p.G12D	Confirmed somatic variant	Substitution - Missense	S1	pancreas	adenocarcinoma	example-v1
+KRAS	p.G12D	Confirmed somatic variant	Substitution - Missense	S1	pancreas	adenocarcinoma	example-v1
+KRAS	p.G12V	Confirmed somatic variant	Substitution - Missense	S2	large_intestine	adenocarcinoma	example-v1
+KRAS	p.G13D	Confirmed somatic variant	Substitution - Missense	S3	large_intestine	adenocarcinoma	example-v1
+KRAS	p.Q61H	Confirmed somatic variant	Substitution - Missense	S4	lung	carcinoma	example-v1
+KRAS	p.A146T	Confirmed somatic variant	Substitution - Missense	S5	large_intestine	adenocarcinoma	example-v1
+HRAS	p.G12V	Confirmed somatic variant	Substitution - Missense	S6	urinary_tract	carcinoma	example-v1
+HRAS	p.G13R	Confirmed somatic variant	Substitution - Missense	S7	head_and_neck	squamous_cell_carcinoma	example-v1
+HRAS	p.Q61R	Confirmed somatic variant	Substitution - Missense	S8	thyroid	adenoma	example-v1
+NRAS	p.G12D	Confirmed somatic variant	Substitution - Missense	S9	haematopoietic_and_lymphoid_tissue	leukaemia	example-v1
+NRAS	p.G13D	Confirmed somatic variant	Substitution - Missense	S10	haematopoietic_and_lymphoid_tissue	leukaemia	example-v1
+NRAS	p.Q61K	Confirmed somatic variant	Substitution - Missense	S11	skin	melanoma	example-v1
+NRAS	p.Q61R	Confirmed somatic variant	Substitution - Missense	S12	skin	melanoma	example-v1
+KRAS	p.G12G	Confirmed somatic variant	Substitution - coding silent	S13	lung	carcinoma	example-v1
+KRAS	p.G12D	Reported in another sample as somatic	Substitution - Missense	S14	pancreas	adenocarcinoma	example-v1

@@ -1,0 +1,86 @@
+# Configuración del análisis
+# Modificar con cuidado: estos parámetros condicionan todos los notebooks
+
+family:
+  name: RAS
+  members:
+    - gene: KRAS
+      uniprot: P01116
+      isoform: 1   # P01116-1 (4B)
+      pdb_primary: 4OBE
+      pdb_secondary: 5UK9
+    - gene: HRAS
+      uniprot: P01112
+      isoform: 1
+      pdb_primary: 3K8Y
+      pdb_secondary: 2RGE
+    - gene: NRAS
+      uniprot: P01111
+      isoform: 1
+      pdb_primary: 5UHV
+      pdb_secondary: 3CON
+
+g_domain:
+  start: 1
+  end: 166
+
+active_site:
+  p_loop:
+    start: 10
+    end: 17
+  switch_1:
+    start: 30
+    end: 38
+  switch_2:
+    start: 60
+    end: 76
+  ligand_residues_3letter:
+    - GDP
+    - GTP
+    - GNP   # GppNHp
+  cofactor: MG
+  cutoff_angstrom: 4.0
+
+cosmic:
+  version: ""        # Rellenar con la versión exacta usada (ej. "v100")
+  raw_filename: "CosmicMutantCensus.tsv"
+  example_filename: "cosmic_minimal_example.tsv"
+  filters:
+    somatic_status: "Confirmed somatic variant"
+    mutation_description_contains: "Substitution - Missense"
+    deduplicate_by:
+      - "ID_sample"
+      - "Mutation AA"
+  expected_columns:
+    - "GENE_NAME"
+    - "Mutation AA"
+    - "Mutation somatic status"
+    - "Mutation Description"
+    - "ID_sample"
+    - "Primary site"
+    - "Histology"
+
+recurrence:
+  min_members_with_mutation: 2
+  min_samples_per_member: 10
+
+msa:
+  algorithm: "clustalo"   # alternativas: mafft, muscle
+  output_format: "fasta"
+
+sasa:
+  method: "dssp"          # alternativa: freesasa
+  reference_max_sasa: "tien_2013"
+
+conservation:
+  method: "shannon"       # alternativas: jensen_shannon, consurf
+  use_orthologs: false    # poner true si se amplía el MSA con OrthoDB
+
+random_seed: 42
+
+paths:
+  data_raw: "data/raw"
+  data_example: "data/example"
+  data_processed: "data/processed"
+  data_external: "data/external"
+  figures: "figures"

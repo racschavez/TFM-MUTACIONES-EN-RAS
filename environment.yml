@@ -1,0 +1,36 @@
+name: tfm-ras
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python=3.11
+  - pip
+  # Core científico
+  - numpy>=1.26
+  - pandas>=2.2
+  - scipy>=1.12
+  # Bio
+  - biopython>=1.83
+  - freesasa
+  - dssp
+  # MSA externo
+  - clustalo
+  - mafft
+  # Visualización
+  - matplotlib>=3.8
+  - seaborn>=0.13
+  - py3Dmol
+  # Notebook
+  - jupyterlab
+  - ipywidgets
+  - nglview
+  # Calidad
+  - pytest
+  - ruff
+  - black
+  # Otros
+  - requests
+  - pyyaml
+  - tqdm
+  - pip:
+      - -e .

@@ -1,0 +1,50 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Entornos
+.venv/
+venv/
+.conda/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Datos en bruto (NO versionar COSMIC)
+data/raw/*
+!data/raw/.gitkeep
+!data/raw/cosmic/
+data/raw/cosmic/*
+!data/raw/cosmic/.gitkeep
+
+# Datos procesados grandes (versionar selectivamente)
+data/processed/*.h5
+data/processed/*.parquet
+!data/processed/.gitkeep
+
+# Datos externos descargados (PDBs grandes)
+data/external/pdb/
+!data/external/.gitkeep
+
+# Figuras intermedias
+figures/draft/
+
+# Logs y caches
+*.log
+.cache/
+.pytest_cache/
+.ruff_cache/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.swp
