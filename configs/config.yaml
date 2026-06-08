@@ -1,82 +1,107 @@
 # Configuración del análisis
 # Modificar con cuidado: estos parámetros condicionan todos los notebooks
 
+project:
+  name: tfm-ras
+  seed: 42
+
 family:
   name: RAS
   members:
-    - gene: KRAS
-      uniprot: P01116
-      isoform: 1   # P01116-1 (4B)
-      pdb_primary: 4OBE
-      pdb_secondary: 5UK9
-    - gene: HRAS
-      uniprot: P01112
-      isoform: 1
-      pdb_primary: 3K8Y
-      pdb_secondary: 2RGE
-    - gene: NRAS
-      uniprot: P01111
-      isoform: 1
-      pdb_primary: 5UHV
-      pdb_secondary: 3CON
-
-g_domain:
-  start: 1
-  end: 166
+    KRAS:
+      uniprot_id: P01116
+      isoform: P01116-1
+      length: 189
+      domain_g:
+        start: 1
+        end: 166
+      pdbs:
+        primary:
+          id: 4OBE
+          ligand: GDP
+          resolution_angstrom: 1.95
+        secondary:
+          id: 5UK9
+          ligand: GppNHp
+          resolution_angstrom: 1.55
+    HRAS:
+      uniprot_id: P01112
+      length: 189
+      domain_g:
+        start: 1
+        end: 166
+      pdbs:
+        primary:
+          id: 3K8Y
+          ligand: GppNHp
+          resolution_angstrom: 1.31
+        secondary:
+          id: 2RGE
+          ligand: GDP
+          resolution_angstrom: 1.31
+    NRAS:
+      uniprot_id: P01111
+      length: 189
+      domain_g:
+        start: 1
+        end: 166
+      pdbs:
+        primary:
+          id: 5UHV
+          ligand: GppNHp
+          resolution_angstrom: 1.65
+        secondary:
+          id: 3CON
+          ligand: GDP
 
 active_site:
-  p_loop:
-    start: 10
-    end: 17
-  switch_1:
-    start: 30
-    end: 38
-  switch_2:
-    start: 60
-    end: 76
-  ligand_residues_3letter:
-    - GDP
-    - GTP
-    - GNP   # GppNHp
-  cofactor: MG
-  cutoff_angstrom: 4.0
+  numbering: shared_uniprot
+  regions:
+    p_loop:
+      start: 10
+      end: 17
+    switch_i:
+      start: 30
+      end: 38
+    switch_ii:
+      start: 60
+      end: 76
+    nkxd:
+      start: 116
+      end: 119
+    sak:
+      start: 145
+      end: 147
+  cofactors:
+    - Mg2+
+
+hotspots:
+  - position: 12
+    residue: G
+  - position: 13
+    residue: G
+  - position: 61
+    residue: Q
+
+thresholds:
+  recurrent_min_members: 2
+  recurrent_min_samples_per_member: 10
 
 cosmic:
-  version: ""        # Rellenar con la versión exacta usada (ej. "v100")
-  raw_filename: "CosmicMutantCensus.tsv"
+  version: "v104"        # Rellenar con la versión exacta usada (ej. "v100")
+  human_reference_genome: "GRCh38"  # Rellenar con la referencia exacta usada (ej. "GRCh37" o "GRCh38")
+  
+  raw_filename: "Cosmic_MutantCensus_{version}_{human_reference_genome}.tsv.gz"
+  classification_filename: "Cosmic_Classification_{version}_{human_reference_genome}.tsv.gz"
+
   example_filename: "cosmic_minimal_example.tsv"
+  
   filters:
     somatic_status: "Confirmed somatic variant"
-    mutation_description_contains: "Substitution - Missense"
+    mutation_description_contains: "missense_variant"
     deduplicate_by:
-      - "ID_sample"
-      - "Mutation AA"
-  expected_columns:
-    - "GENE_NAME"
-    - "Mutation AA"
-    - "Mutation somatic status"
-    - "Mutation Description"
-    - "ID_sample"
-    - "Primary site"
-    - "Histology"
-
-recurrence:
-  min_members_with_mutation: 2
-  min_samples_per_member: 10
-
-msa:
-  algorithm: "clustalo"   # alternativas: mafft, muscle
-  output_format: "fasta"
-
-sasa:
-  method: "dssp"          # alternativa: freesasa
-  reference_max_sasa: "tien_2013"
-
-conservation:
-  method: "shannon"       # alternativas: jensen_shannon, consurf
-  use_orthologs: false    # poner true si se amplía el MSA con OrthoDB
-
-random_seed: 42
+      - "COSMIC_SAMPLE_ID"
+      - "MUTATION_AA"
 
 paths:
   data_raw: "data/raw"

@@ -18,15 +18,15 @@ UNIPROT_BY_GENE = {
     "HRAS": "P01112",
     "NRAS": "P01111",
 }
-EXPECTED_COSMIC_COLUMNS = {
-    "GENE_NAME",
-    "Mutation AA",
-    "Mutation somatic status",
-    "Mutation Description",
-    "ID_sample",
-    "Primary site",
-    "Histology",
-}
+EXPECTED_COSMIC_COLUMNS = [
+    "GENE_SYMBOL",
+    "MUTATION_AA",
+    "MUTATION_SOMATIC_STATUS",
+    "MUTATION_DESCRIPTION",
+    "COSMIC_SAMPLE_ID",
+    "PRIMARY_SITE",
+    "PRIMARY_HISTOLOGY",
+]
 CURATED_COLUMNS = [
     "gene",
     "uniprot_id",
@@ -42,7 +42,7 @@ CURATED_COLUMNS = [
 AA_CHANGE_RE = re.compile(r"^p\.([A-Z])(\d+)([A-Z])$")
 
 
-def load_cosmic_raw(path: str | Path) -> pd.DataFrame:
+def load_cosmic_raw(*paths) -> list[pd.DataFrame]:
     """
     Carga el fichero en bruto descargado de COSMIC.
     Parameters
@@ -51,16 +51,22 @@ def load_cosmic_raw(path: str | Path) -> pd.DataFrame:
         Ruta al fichero COSMIC (típicamente un TSV).
     Returns
     -------
-    pd.DataFrame
-        DataFrame con todas las columnas originales.
+    list[pd.DataFrame]
+        Lista de DataFrames cargados.
     """
-    df = pd.read_csv(path, sep="\t")
-    if missing_expected_columns(df) != []:
+    #Lectura de los DataFrames cargados con pandas
+    dfs = [pd.read_csv(path, sep="\t", low_memory=False) for path in paths]
+
+    #Comprobación de columnas esperadas en los DataFrames cargados
+    missing = missing_expected_columns(*dfs)
+
+    if missing:
         raise ValueError(
-            f"Faltan columnas esperadas en el fichero COSMIC: {missing_expected_columns(df)}"
+            f"Faltan columnas esperadas en el fichero COSMIC: {missing}"
         )
+    
     else:
-        return df
+        return dfs
 
     # TODO(alumno): cargar TSV con pandas, comprobar columnas esperadas y
     # documentar cualquier mapeo de nombres usado para COSMIC real.
@@ -83,16 +89,28 @@ def filter_somatic_missense(df: pd.DataFrame, cfg_filters: dict) -> pd.DataFrame
     """
     from IPython.display import display
 
+    #Filtrando por genes RAS
+    df = df[df["GENE_SYMBOL"].isin(RAS_GENES)]
+    #Conteo inicial de mutaciones en genes RAS
     n_inicial = len(df)
 
-    df_somaticas = df[df["Mutation somatic status"] == cfg_filters['somatic_status']]
+    #Filtrando por mutaciones somáticas confirmadas
+    df_somaticas = df[df["MUTATION_SOMATIC_STATUS"] == cfg_filters['somatic_status']]
+    #Conteo de mutaciones somáticas confirmadas
     n_somaticas = len(df_somaticas)
 
-    df_filtrado = df_somaticas[df_somaticas["Mutation Description"] == cfg_filters['mutation_description_contains']]
+    #Filtrando por mutaciones missense
+    df_filtrado = df_somaticas[(
+        df_somaticas["MUTATION_DESCRIPTION"] == cfg_filters['mutation_description_contains'])
+        &
+        (df_somaticas["MUTATION_AA"].str.match(r"^p\.([A-Z])(\d+)([A-Z])$", na=False))
+    ]
     
+    #Conteo de mutaciones missense
     n_missense = len(df_filtrado)
     n_final = len(df_filtrado)
 
+    #Mostrar resumen de conteos
     summary = pd.DataFrame([{
         "Conteo Inicial": n_inicial,
         "Mutaciones Somáticas": n_somaticas,
@@ -102,6 +120,7 @@ def filter_somatic_missense(df: pd.DataFrame, cfg_filters: dict) -> pd.DataFrame
 
     display(summary.style.hide(axis="index"))
 
+    #DataFrame filtrado
     return df_filtrado
 
     # TODO(alumno): usar los filtros declarados en configs/config.yaml y guardar
@@ -112,7 +131,7 @@ def deduplicate_by_sample(df: pd.DataFrame) -> pd.DataFrame:
     """
     Elimina duplicados manteniendo una mutacion por muestra y cambio proteico.
     """
-    df_dedup = df.drop_duplicates(subset=["ID_sample", "Mutation AA"])
+    df_dedup = df.drop_duplicates(subset=["COSMIC_SAMPLE_ID", "MUTATION_AA"])
 
     return df_dedup
 
@@ -150,28 +169,28 @@ def build_curated_dataset(df_filtered: pd.DataFrame, cfg_version: str) -> pd.Dat
     df_curated = pd.DataFrame()
 
         #Columna "gene"
-    df_curated['gene'] = df_filtered['GENE_NAME'].astype(str)
+    df_curated['gene'] = df_filtered['GENE_SYMBOL'].astype(str)
 
         #Columna "uniprot_id"
-    df_curated['uniprot_id'] = df_filtered['GENE_NAME'].map(UNIPROT_BY_GENE).astype(str)
+    df_curated['uniprot_id'] = df_filtered['GENE_SYMBOL'].map(UNIPROT_BY_GENE).astype(str)
     
         #Columna "position", "wt_aa", "mut_aa"
 
-    df_curated['position'] = df_filtered['Mutation AA'].apply(lambda x: parse_aa_change(x)[1]).astype(int)
-    df_curated['wt_aa'] = df_filtered['Mutation AA'].apply(lambda x: parse_aa_change(x)[0]).astype(str)
-    df_curated['mut_aa'] = df_filtered['Mutation AA'].apply(lambda x: parse_aa_change(x)[2]).astype(str)
+    df_curated['position'] = df_filtered['MUTATION_AA'].apply(lambda x: parse_aa_change(x)[1]).astype(int)
+    df_curated['wt_aa'] = df_filtered['MUTATION_AA'].apply(lambda x: parse_aa_change(x)[0]).astype(str)
+    df_curated['mut_aa'] = df_filtered['MUTATION_AA'].apply(lambda x: parse_aa_change(x)[2]).astype(str)
 
         #Columna "hgvs_p"   
-    df_curated['hgvs_p']= df_filtered['Mutation AA'].astype(str)
+    df_curated['hgvs_p']= df_filtered['MUTATION_AA'].astype(str)
 
         #Columna "sample_count"
     df_curated['sample_count'] = len(df_curated)
 
         #Columna "tumour_types"
-    df_curated['tumour_types'] = df_filtered['Histology'].astype(str)
+    df_curated['tumour_types'] = df_filtered['PRIMARY_HISTOLOGY'].astype(str)
 
         #Columna "primary_tissues"
-    df_curated['primary_tissues'] = df_filtered['Primary site'].astype(str)
+    df_curated['primary_tissues'] = df_filtered['PRIMARY_SITE'].astype(str)
 
         #Columna "cosmic_version"
     df_curated['cosmic_version'] = str(cfg_version)
@@ -179,6 +198,10 @@ def build_curated_dataset(df_filtered: pd.DataFrame, cfg_version: str) -> pd.Dat
     return df_curated
 
 
-def missing_expected_columns(df: pd.DataFrame) -> list[str]:
-    """Devuelve columnas COSMIC esperadas que no aparecen en ``df``."""
-    return sorted(EXPECTED_COSMIC_COLUMNS - set(df.columns))
+def missing_expected_columns(*dfs) -> list:
+    """Devuelve columnas COSMIC esperadas ausentes en los DataFrames proporcionados."""
+    combined_columns = set().union(*(set(df.columns) for df in dfs))
+
+    missing = set(EXPECTED_COSMIC_COLUMNS) - combined_columns
+
+    return sorted(missing)
