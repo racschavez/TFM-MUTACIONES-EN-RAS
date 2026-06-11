@@ -441,7 +441,7 @@ def parse_structure(pdb_path):
     return next(structure.get_models())  # primer modelo de la jerarquía SMCRA
 
 
-def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"), cofactor="MG", chain_id="A"):
+def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"), cofactor="MG", chain_id="A", max_mg_distance=3.5):
     """Extrae los átomos del sitio activo de la proteína RAS de la estructura.
 
     El sitio activo de las proteínas RAS es el bolsillo de unión al nucleótido
@@ -500,38 +500,37 @@ def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"
     # Normalizamos el nombre del cofactor a mayúsculas para la comparación.
     cofactor = cofactor.upper()  # "MG" -> "MG"
 
-    # Lista donde acumularemos los átomos encontrados.
-    atoms = []  # resultado vacío que se irá llenando
-
-    # Iteramos sobre todos los residuos de todos los modelos de la estructura.
-    # 'structure.get_residues()' produce objetos Residue de Biopython en el
-    # orden en que aparecen en el fichero PDB.
-    for residue in structure.get_residues():  # itera todos los residuos del modelo
-
+    # Extraemos los átomos del nucleótido
+    nucleotide_atoms = []
+    for residue in structure.get_residues():
         if residue.get_parent().id != chain_id:
-            continue  # salta residuos de otras cadenas (ej. cadena "B" de ligandos o aguas)
-        # '.resname' es el nombre de tres/cuatro letras del residuo en el PDB
-        # (ej. "GDP", "MG", "HOH").  Eliminamos espacios con '.strip()' y
-        # convertimos a mayúsculas para una comparación robusta.
-        resname = residue.resname.strip().upper()  # nombre normalizado del residuo
+            continue
+        if residue.resname.strip().upper() in ligand_resnames:
+            nucleotide_atoms.extend(list(residue.get_atoms()))
 
-        # Comprobamos si este residuo es uno de los ligandos nucleotídicos o
-        # el cofactor Mg²⁺.  La condición usa el operador 'or' para agrupar
-        # ambas categorías en una sola comprobación.
-        if resname in ligand_resnames or resname == cofactor:
-            # 'residue.get_atoms()' es un generador; 'list(...)' lo materializa
-            # para poder extenderlo directamente en la lista de átomos.
-            # 'atoms.extend(...)' añade todos los elementos de la lista al
-            # final de 'atoms' (equivale a un bucle de 'atoms.append').
-            atoms.extend([a for a in residue.get_atoms() if a.altloc in (' ', 'A')])  # añade todos los átomos del residuo, si estan duplicados por altloc se queda con el principal ('' o 'A')
+    if not nucleotide_atoms:
+        raise ValueError("No se encontró nucleótido en la estructura.")
 
-    # Si no encontramos ningún átomo relevante, la estructura carece de ligando
-    # o los nombres son distintos; levantamos un error descriptivo.
-    if not atoms:  # lista vacía -> no se encontró nada
+    nucleotide_coords = np.array([a.coord for a in nucleotide_atoms])
+
+    # Añadimos solo el MG que esté cerca del nucleótido
+    mg_atoms = []
+    for residue in structure.get_residues():
+        if residue.get_parent().id != chain_id:
+            continue
+        if residue.resname.strip().upper() == cofactor:
+            for atom in residue.get_atoms():
+                # Distancia mínima de este átomo MG a cualquier átomo del nucleótido
+                dists = np.linalg.norm(nucleotide_coords - atom.coord, axis=1)
+                if dists.min() <= max_mg_distance:
+                    mg_atoms.append(atom)  # solo el MG funcional
+
+    atoms = nucleotide_atoms + mg_atoms
+
+    if not atoms:
         raise ValueError("No se encontraron átomos del nucleótido ligando ni del cofactor Mg.")
 
-    # Devolvemos la lista de átomos del sitio activo.
-    return atoms  # lista de Atom de Biopython
+    return atoms
 
 
 def compute_sasa(structure, chain_id="A", method="dssp", relative=True):

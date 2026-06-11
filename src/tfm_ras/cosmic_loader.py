@@ -165,7 +165,7 @@ def build_curated_dataset(df_filtered: pd.DataFrame, cfg_version: str) -> pd.Dat
     este esquema.
     """
 
-    #Construcción del dataframe columna por columna
+    #Construcción del dataframe curado
     df_curated = pd.DataFrame()
 
         #Columna "gene"
@@ -180,11 +180,12 @@ def build_curated_dataset(df_filtered: pd.DataFrame, cfg_version: str) -> pd.Dat
     df_curated['wt_aa'] = df_filtered['MUTATION_AA'].apply(lambda x: parse_aa_change(x)[0]).astype(str)
     df_curated['mut_aa'] = df_filtered['MUTATION_AA'].apply(lambda x: parse_aa_change(x)[2]).astype(str)
 
-        #Columna "hgvs_p"   
+        #Columna "hgvs_p" 
     df_curated['hgvs_p']= df_filtered['MUTATION_AA'].astype(str)
 
         #Columna "sample_count"
-    df_curated['sample_count'] = len(df_curated)
+    sample_count = df_filtered['MUTATION_AA'].value_counts()
+    df_curated['sample_count'] = df_curated['hgvs_p'].map(sample_count)
 
         #Columna "tumour_types"
     df_curated['tumour_types'] = df_filtered['PRIMARY_HISTOLOGY'].astype(str)
@@ -192,9 +193,25 @@ def build_curated_dataset(df_filtered: pd.DataFrame, cfg_version: str) -> pd.Dat
         #Columna "primary_tissues"
     df_curated['primary_tissues'] = df_filtered['PRIMARY_SITE'].astype(str)
 
+        # Agrupamos por mutación única y contamos muestras
+    df_curated = (df_curated
+                  .groupby(['gene', 'uniprot_id', 'position', 'wt_aa', 'mut_aa', 'hgvs_p'])
+                  .agg(
+                      sample_count = ('hgvs_p', 'count'),
+                      tumor_types = ('tumour_types', lambda x: ' | '.join(sorted(set(x)))),
+                      primary_tissues = ('primary_tissues', lambda x: ' | '.join(sorted(set(x))))
+                  )
+                    .reset_index()
+    )
+
         #Columna "cosmic_version"
     df_curated['cosmic_version'] = str(cfg_version)
-    
+
+
+    # Ordenamos dataframe curado por gen y sample_count descendente
+    df_curated['gene'] = pd.Categorical(df_curated['gene'], categories=RAS_GENES, ordered=True) 
+    df_curated = df_curated.sort_values(by=['gene', 'sample_count'], ascending=[True, False])
+
     return df_curated
 
 

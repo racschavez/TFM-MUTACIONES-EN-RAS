@@ -19,11 +19,11 @@ family:
         primary:
           id: 4OBE
           ligand: GDP
-          resolution_angstrom: 1.95
+          resolution_angstrom: 1.24
         secondary:
           id: 5UK9
           ligand: GppNHp
-          resolution_angstrom: 1.55
+          resolution_angstrom: 1.89
     HRAS:
       uniprot_id: P01112
       length: 189
@@ -34,11 +34,11 @@ family:
         primary:
           id: 3K8Y
           ligand: GppNHp
-          resolution_angstrom: 1.31
+          resolution_angstrom: 1.30
         secondary:
           id: 2RGE
           ligand: GDP
-          resolution_angstrom: 1.31
+          resolution_angstrom: 1.40
     NRAS:
       uniprot_id: P01111
       length: 189
@@ -49,10 +49,11 @@ family:
         primary:
           id: 5UHV
           ligand: GppNHp
-          resolution_angstrom: 1.65
+          resolution_angstrom: 1.67
         secondary:
           id: 3CON
           ligand: GDP
+          resolution_angstrom: 1.65
 
 active_site:
   numbering: shared_uniprot

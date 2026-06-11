@@ -618,64 +618,113 @@ def visualize_msa(msa, position_map, output_path):
     # Asegurar que output_path sea un objeto Path (acepta tanto str como Path como entrada).
     output_path = Path(output_path)
 
-    # Crear el directorio de salida y sus padres si no existen.
+    # Crear el directorio de salida.
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # Lista ordenada de los nombres de grupos de color (define el índice en la paleta discreta).
+# Colormap discreto
+    # Lista ordenada de los nombres de grupos de color.
     color_names = list(AA_GROUP_COLORS)
 
     # Diccionario inverso: {nombre_grupo → índice} para asignar valores enteros a la matriz.
     # Matplotlib necesita índices numéricos para usar un colormap discreto (ListedColormap).
     color_lookup = {name: index for index, name in enumerate(color_names)}
 
-    # Construir la matriz de colores como lista de listas de índices enteros.
+    # ListedColormap asigna un color fijo a cada índice entero
+    cmap = plt.matplotlib.colors.ListedColormap(
+        [AA_GROUP_COLORS[name] for name in color_names]
+    )
+
+# Construir matriz de índices de color
+    # Convertimos cada aminoácido de cada secuencia al índice de su grupo fisicoquímico.
+    # El resultado es un array 2D (n_genes × n_pos) de enteros que imshow colorea
+    # usando el colormap discreto construido arriba.
+    # Las tres isoformas tienen la misma longitud de MSA, por lo que no hay gaps.
     matrix = []
-    labels = []  # Etiquetas de las filas (nombres de genes)
+    labels = []  # etiquetas de fila (nombres de genes)
 
     for gene in GENES:
-        labels.append(gene)  # Añadir el nombre del gen como etiqueta de fila
-
-        # Para cada aminoácido de la secuencia alineada, obtener el índice de color correspondiente.
-        # _aa_group(aa) clasifica el aminoácido en su grupo fisicoquímico.
+        labels.append(gene)
         matrix.append([color_lookup[_aa_group(aa)] for aa in str(records[gene].seq)])
 
     # Convertir la lista de listas a un array NumPy 2D (filas=genes, columnas=posiciones MSA).
     matrix_array = np.asarray(matrix)
 
-    # Crear un colormap discreto (ListedColormap) con los colores en el orden de color_names.
-    cmap = plt.matplotlib.colors.ListedColormap([AA_GROUP_COLORS[name] for name in color_names])
+#Parámetros de figura 
+    # Ancho proporcional a la longitud del MSA
+    fig_width = max(14, msa.get_alignment_length() / 10)
 
-    # Calcular el ancho de la figura de forma proporcional a la longitud del alineamiento.
-    # División entre 12 para que 12 residuos ocupen aproximadamente 1 pulgada.
-    # max(12, ...) garantiza un ancho mínimo de 12 pulgadas.
-    fig_width = max(12, msa.get_alignment_length() / 12)
+    fig, ax = plt.subplots(figsize=(fig_width, 4.2))
 
-    # Crear la figura y el eje de Matplotlib con las dimensiones calculadas.
-    fig, ax = plt.subplots(figsize=(fig_width, 3.4))
+    # Ajuste manual de márgenes
+    fig.subplots_adjust(left=0.05, right=0.99, top=0.88, bottom=0.22)
 
-    # Dibujar la matriz de colores como una imagen (imshow):
-    #   aspect="auto"          → no fuerza celdas cuadradas; se adapta al espacio disponible
-    #   interpolation="nearest" → sin suavizado entre celdas (cada píxel = un residuo)
-    #   cmap                   → colormap discreto construido arriba
-    ax.imshow(matrix_array, aspect="auto", interpolation="nearest", cmap=cmap)
+# Dibujar la matriz de residuos
+    # Dibujamos cada fila por separado con 'extent' para insertar un gap visual (row_gap) entre isoformas
+    row_gap  = 0.15   # separación visual entre filas en unidades de datos
+    row_h    = 1.0    # altura de cada fila en unidades de datos
+    n_genes  = len(GENES)
 
-    # Configurar las marcas del eje Y con los nombres de los genes.
-    ax.set_yticks(range(len(labels)))
-    ax.set_yticklabels(labels)
+    for gi, gene in enumerate(GENES):
+        # y_top: borde superior de la fila; acumula el gap entre filas anteriores.
+        y_top    = gi * (row_h + row_gap)
+        y_bottom = y_top + row_h
 
-    # Etiquetas de los ejes y título.
-    ax.set_xlabel("Posición MSA")
-    ax.set_title("Alineamiento múltiple de la familia RAS")
+        row_array = matrix_array[gi:gi+1, :]   # shape (1, n_pos); slice mantiene 2D
 
-    # Crear marcas en el eje X cada 20 posiciones MSA (de 0 a la longitud total).
+        # 'extent' define [xmin, xmax, ymax, ymin] en coordenadas de datos.
+        # origin="upper" hace que el eje Y crezca hacia abajo (convenio imshow).
+        ax.imshow(
+            row_array,
+            aspect="auto",
+            interpolation="nearest",    # sin suavizado; cada píxel = un residuo
+            cmap=cmap,
+            vmin=0,
+            vmax=len(color_names) - 1,
+            extent=[-0.5, msa.get_alignment_length() - 0.5, y_bottom, y_top],
+            origin="upper",
+        )
+
+        # Borde fino alrededor de cada fila para delimitar visualmente los residuos.
+        ax.add_patch(plt.matplotlib.patches.Rectangle(
+            (-0.5, y_top), msa.get_alignment_length(), row_h,
+            linewidth=0.4, edgecolor="#888888", facecolor="none"
+        ))
+
+        # Etiqueta del gen en negrita con color propio por isoforma, a la izquierda.
+        # El color diferenciado refuerza la separación visual entre filas.
+        GENE_LABEL_COLORS = {"KRAS": "#534AB7", "HRAS": "#0F6E56", "NRAS": "#993C1D"}
+        ax.text(
+            -2, y_top + row_h / 2, gene,
+            ha="right", va="center",
+            fontsize=9, fontweight="bold",
+            color=GENE_LABEL_COLORS[gene],
+        )
+
+    # Límite Y total: suma de filas y gaps, con pequeño margen superior para hotspots.
+    total_height = n_genes * row_h + (n_genes - 1) * row_gap
+    ax.set_ylim(total_height + 0.1, -0.4)   # -0.4 deja espacio para etiquetas de hotspot
+
+    # Ocultar el eje Y: usamos etiquetas de gen manuales (texto a la izquierda).
+    ax.set_yticks([])
+
+# Eje X 
     tick_positions = np.arange(0, msa.get_alignment_length(), 20)
     ax.set_xticks(tick_positions)
-    # Las etiquetas son 1-based (sumamos 1 a los índices 0-based).
-    ax.set_xticklabels(tick_positions + 1)
+    ax.set_xticklabels(tick_positions + 1, fontsize=7.5)  # 1-based para el lector
+    ax.set_xlabel("Posición MSA", fontsize=9)
+    ax.set_xlim(-0.5, msa.get_alignment_length() - 0.5)
 
-    # Dibujar rectángulos sombreados para cada región funcional definida en FUNCTIONAL_REGIONS.
+    # Título de la figura.
+    ax.set_title(
+        "Alineamiento múltiple de la familia RAS — grupos fisicoquímicos",
+        fontsize=10, pad=10,
+    )
+
+# Regiones funcionales
+    # Sombreamos cada región con un rectángulo semitransparente sobre todas las filas
+    # y añadimos su nombre en el margen inferior, separado del eje X.
     for region_name, (start, end) in FUNCTIONAL_REGIONS.items():
-        # Localizar las filas del mapa posicional donde kras_position está dentro del rango.
+        # Localizar las columnas MSA correspondientes a las posiciones KRAS del rango.
         # .between(start, end) es inclusivo en ambos extremos.
         region_rows = position_map.loc[position_map["kras_position"].between(start, end)]
 
@@ -683,50 +732,87 @@ def visualize_msa(msa, position_map, output_path):
         if region_rows.empty:
             continue
 
-        # Calcular los límites en coordenadas MSA (0-based para imshow):
-        # x0 → borde izquierdo (msa_position mínima - 1.5 para incluir el margen izquierdo)
-        # x1 → borde derecho  (msa_position máxima - 0.5)
+        # x0 y x1: límites del sombreado en coordenadas MSA 0-based.
         x0 = int(region_rows["msa_position"].min()) - 1.5
         x1 = int(region_rows["msa_position"].max()) - 0.5
 
-        # Dibujar un rectángulo semitransparente (alpha=0.08) sobre la región funcional.
-        ax.axvspan(x0, x1, color="black", alpha=0.08)
+        # Sombreado semitransparente; zorder=0 queda bajo los residuos coloreados.
+        ax.axvspan(x0, x1, color="black", alpha=0.07, zorder=0)
 
-        # Añadir el nombre de la región centrado bajo el sombreado.
-        # y=-0.72 coloca la etiqueta ligeramente por debajo del eje superior.
-        ax.text((x0 + x1) / 2, -0.72, region_name, ha="center", va="bottom", fontsize=8)
+        # Etiqueta en cursiva en el margen inferior para distinguirla de las marcas del eje X.
+        ax.text(
+            (x0 + x1) / 2, total_height + 0.18,
+            region_name,
+            ha="center", va="top",
+            fontsize=7.5, color="#444444", style="italic",
+        )
 
-    # Añadir líneas verticales y etiquetas para los hotspots oncogénicos más importantes.
-    # Los números son posiciones en KRAS; las etiquetas son la nomenclatura estándar.
+# Hotspots oncogénicos 
+
+    # Alternar altura de etiquetas para hotspots contiguos (G12 y G13)
+    hotspot_y = {12: -0.55, 13: -0.32, 61: -0.32}  # G12 más arriba que G13
+
+    # Línea punteada vertical + etiqueta en caja con fondo blanco encima de las filas.
+    # La caja evita el solapamiento con residuos cercanos
     for position, label in [(12, "G12"), (13, "G13"), (61, "Q61")]:
-        # Buscar la fila del mapa posicional correspondiente a esta posición de KRAS.
         rows = position_map.loc[position_map["kras_position"].eq(position)]
 
         # Si la posición no está en el mapa, saltar.
         if rows.empty:
             continue
 
-        # Obtener la posición MSA (0-based para imshow, por eso restamos 1).
+        # Convertimos a índice 0-based (msa_position es 1-based).
         x = int(rows.iloc[0]["msa_position"]) - 1
 
-        # Dibujar una línea vertical negra fina en la posición del hotspot.
-        ax.axvline(x, color="black", linewidth=1)
+        # Línea punteada semitransparente: visible pero sin tapar los residuos.
+        # linestyle=(0, (3, 3)) define guiones de 3pt con huecos de 3pt.
+        ax.axvline(
+            x, color="#222222", linewidth=0.8,
+            linestyle=(0, (3, 3)), alpha=0.55, zorder=3,
+        )
 
-        # Añadir la etiqueta del hotspot en la parte superior de la figura.
-        # y=len(labels)-0.05 coloca la etiqueta justo encima de la última fila.
-        ax.text(x, len(labels) - 0.05, label, ha="center", va="bottom", fontsize=8)
+        # Etiqueta en caja con fondo blanco; zorder=5 la pone por encima de todo.
+        ax.text(
+            x, hotspot_y[position], label,
+            ha="center", va="bottom",
+            fontsize=8, fontweight="bold", color="#222222",
+            bbox=dict(
+                boxstyle="round,pad=0.25",
+                facecolor="white",
+                edgecolor="#999999",
+                linewidth=0.5,
+            ),
+            zorder=5,
+        )
 
-    # Construir las marcas de leyenda como parches de color con el nombre del grupo.
-    handles = [plt.matplotlib.patches.Patch(color=AA_GROUP_COLORS[name], label=name) for name in color_names]
+# Leyenda
+    # Parche de color por grupo fisicoquímico con borde fino para legibilidad.
+    handles = [
+        plt.matplotlib.patches.Patch(
+            color=AA_GROUP_COLORS[name],
+            label=name,
+            linewidth=0.3,
+            edgecolor="#888888",
+        )
+        for name in color_names
+    ]
 
-    # Colocar la leyenda centrada debajo del gráfico para no solapar la imagen.
-    ax.legend(handles=handles, loc="upper center", bbox_to_anchor=(0.5, -0.25), ncol=6)
+    # Leyenda centrada debajo del gráfico en 6 columnas para no solapar la figura.
+    ax.legend(
+        handles=handles,
+        loc="upper center",
+        bbox_to_anchor=(0.5, -0.12),
+        ncol=6,
+        fontsize=8,
+        frameon=True,
+        framealpha=0.9,
+        edgecolor="#cccccc",
+    )
 
-    # Ajustar los márgenes para que todos los elementos quepan en la figura.
-    fig.tight_layout()
-
-    # Guardar la figura en disco con resolución de 300 DPI (adecuada para publicaciones).
-    fig.savefig(output_path, dpi=300)
+# Guardar y cerrar 
+    # bbox_inches="tight" ajusta el recuadro para incluir etiquetas exteriores
+    # (etiquetas de gen a la izquierda, leyenda y regiones funcionales abajo).
+    fig.savefig(output_path, dpi=300, bbox_inches="tight")
 
     # Cerrar la figura para liberar memoria (importante en bucles que generan muchas figuras).
     plt.close(fig)
