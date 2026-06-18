@@ -750,11 +750,11 @@ def visualize_msa(msa, position_map, output_path):
 # Hotspots oncogénicos 
 
     # Alternar altura de etiquetas para hotspots contiguos (G12 y G13)
-    hotspot_y = {12: -0.55, 13: -0.32, 61: -0.32}  # G12 más arriba que G13
+    hotspot_y = {12: -0.55, 13: -0.32, 61: -0.32, 146: -0.32, 117: -0.32, 59: -0.55}  # G12 más arriba que G13
 
     # Línea punteada vertical + etiqueta en caja con fondo blanco encima de las filas.
     # La caja evita el solapamiento con residuos cercanos
-    for position, label in [(12, "G12"), (13, "G13"), (61, "Q61")]:
+    for position, label in [(12, "G12"), (13, "G13"), (61, "Q61"), (146, "A146"), (117, "K117"), (59, "A59")]:
         rows = position_map.loc[position_map["kras_position"].eq(position)]
 
         # Si la posición no está en el mapa, saltar.
@@ -909,8 +909,10 @@ def consensus_sequence(msa):
 
         # Seleccionar el aminoácido más frecuente (most_common(1) devuelve [(aa, count)]).
         # Si counts está vacío (solo había gaps), usar '-' como carácter de consenso.
-        consensus.append(counts.most_common(1)[0][0] if counts else "-")
-
+        # Si hay empate entre los más frecuentes, usar 'X' (aminoácido ambiguo, nomenclatura IUPAC).
+        top = counts.most_common()
+        consensus.append("-" if not counts else "X" if len(top) > 1 and top[0][1] == top[1][1] else top[0][0])
+   
     # Unir la lista de caracteres en una única cadena de texto.
     return "".join(consensus)
 
