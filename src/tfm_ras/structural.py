@@ -585,8 +585,6 @@ def compute_sasa(structure, chain_id="A", method="dssp", relative=True):
        position residue   sasa_abs  sasa_rel
     0         1       M  180.30...  0.803...
     """
-    
-    print(f"    [cadenas en structure: {[c.id for c in structure.get_chains()]}]")
 
     # Normalizamos el método a minúsculas para comparación insensible a caso.
     method = method.lower()  # "DSSP" -> "dssp"
@@ -602,15 +600,16 @@ def compute_sasa(structure, chain_id="A", method="dssp", relative=True):
             # Intentamos calcular el SASA con DSSP.  Si falla por cualquier
             # razón (ej. la estructura tiene residuos no estándar que confunden
             # a DSSP), la excepción es capturada y se usa el método alternativo.
-            return _compute_sasa_dssp(structure, chain_id=chain_id, relative=relative)
-        except Exception:
-            # Capturamos cualquier excepción (bare except on Exception) de forma
-            # intencionada: no nos importa el tipo de fallo de DSSP; queremos
-            # degradar silenciosamente al método Python puro.
-            pass  # fallo silencioso: se continúa con Shrake-Rupley
+            sasa_result = _compute_sasa_dssp(structure, chain_id=chain_id, relative=relative)
+            
+            return sasa_result, "DDSP"
 
-    # --- Fallback a Shrake-Rupley (siempre disponible, escrito en Python) -----
-    return _compute_sasa_shrake_rupley(structure, chain_id=chain_id, relative=relative)
+        except Exception:
+            pass
+
+    result = _compute_sasa_shrake_rupley(structure, chain_id=chain_id, relative=relative)
+ 
+    return result, "Shrake-Rupley"
 
 
 def distance_to_active_site(structure, active_site_atoms, chain_id="A"):
@@ -1142,23 +1141,60 @@ def plot_features_overview(master_df, output_path):
 
         # Sombreado gris claro (alpha=0.05) para regiones funcionalmente
         # importantes del dominio G de RAS:
-        #   P-loop (residuos 10–17): contacta con los fosfatos del nucleótido.
-        #   Switch I (30–38):  cambia conformación entre GDP y GTP; interacciona
-        #                      con GTPasa activating proteins (GAPs) y efectores.
-        #   Switch II (60–76): región más móvil; hotspot Q61 está aquí.
-        for start, end in [(10, 17), (30, 38), (60, 76)]:
-            # 'axvspan' dibuja un rectángulo vertical entre 'start' y 'end' con
-            # color negro semi-transparente (alpha=0.05) como fondo sombreado.
+        # P-loop (motivo G1, residuos 10-17)  
+        # Switch I (residuos 30-38)           
+        # Switch II (residuos 60-76)
+        # NKxD (residuos 116-119)          
+        # SAK (residuos 145-147)
+
+        FUNCTIONAL_REGIONS = {
+            "P-loop": (10, 17),
+            "Switch I": (30, 38),
+            "Switch II": (60, 76),
+            "NKxD": (116, 119),
+            "SAK": (145, 147),
+            }
+        
+        for region, (start, end) in FUNCTIONAL_REGIONS.items():
+
+            # Región sombreada
             ax.axvspan(start, end, color="black", alpha=0.05)
 
-        # Líneas verticales punteadas en los hotspots oncogénicos canónicos:
-        #   Posición 12: Gly12 (G12D, G12V, G12C son las mutaciones más
-        #                frecuentes en cáncer de pulmón, páncreas y colon).
-        #   Posición 13: Gly13 (G13D es frecuente en cáncer colorrectal).
-        #   Posición 61: Gln61 (Q61H, Q61R son frecuentes en melanoma y NRAS).
-        for position in (12, 13, 61):
-            # 'axvline' dibuja una línea vertical en la posición dada.
-            ax.axvline(position, color="black", linewidth=0.8, linestyle="--")
+            # Etiqueta de la región
+            ax.text(
+                (start + end)/2,
+                0.98,
+                region,
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="top",
+                fontsize=8,
+                color="dimgray",
+                bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.5)
+                )
+
+        # Líneas verticales punteadas en los hotspots oncogénicos canónicos
+        for position in (12, 13, 61, 146, 117, 59):
+
+            ax.axvline(position,
+                    color="black",
+                    linewidth=0.8,
+                    linestyle="--")
+
+            ax.text(
+                position,
+                0.03,                     # 3 % desde abajo
+                str(position),
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="bottom",
+                fontsize=7,
+                color="dimgray",
+                bbox=dict(facecolor="white",
+                        alpha=0.6,
+                        edgecolor="none",
+                        pad=0.2)
+            )
 
         # Cuadrícula gris muy suave para facilitar la lectura de valores.
         ax.grid(alpha=0.2)

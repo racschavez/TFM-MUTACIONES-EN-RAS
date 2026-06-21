@@ -1,0 +1,7 @@
+msa_position,dominant_gene,dominant_ratio,total_samples,kras_samples,hras_samples,nras_samples
+12,KRAS,0.9260,12487,11564,195,728
+13,KRAS,0.7360,2604,1917,323,364
+146,KRAS,0.9580,361,346,3,12
+117,KRAS,0.8600,121,104,16,1
+59,KRAS,0.7410,81,60,9,12
+61,NRAS,0.6260,2424,542,365,1517

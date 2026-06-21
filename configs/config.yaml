@@ -83,6 +83,13 @@ hotspots:
     residue: G
   - position: 61
     residue: Q
+  - position: 146
+    residue: A
+  - position: 117
+    residue: K
+  - position: 59
+    residue: A
+
 
 thresholds:
   recurrent_min_members: 2

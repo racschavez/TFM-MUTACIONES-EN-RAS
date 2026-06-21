@@ -60,7 +60,7 @@ GENE_COLORS = {"KRAS": "#4C78A8", "HRAS": "#F58518", "NRAS": "#54A24B"}
 # Q61 (Gln61) forma parte del Switch II y es el residuo catalítico que coordina el agua
 # nucleofílica en la GTPasa; su mutación bloquea la hidrólisis intrínseca y la mediada por GAP.
 # El diccionario mapea posición UniProt (int) → etiqueta de texto para las figuras.
-HOTSPOTS = {12: "G12", 13: "G13", 61: "Q61"}
+HOTSPOTS = {12: "G12", 13: "G13", 61: "Q61", 146: "A146", 117: "K117", 59:"A59"}
 
 # Nombres de residuos de ligandos en los ficheros PDB que se colorearán de forma
 # diferenciada en las vistas 3D para contextualizar el sitio de unión a nucleótido:
@@ -193,43 +193,89 @@ def heatmap_mutations_per_position(master_df, output_basename, **kwargs):
         dict: Diccionario con claves 'png' y 'svg' apuntando a los ficheros generados
             (objetos Path).
     """
-    output_base = _output_base(output_basename)  # Normaliza la ruta base (elimina extensión si existe)
+def heatmap_mutations_per_position(master_df, output_basename, **kwargs):
 
-    # pivot_table reorganiza el DataFrame largo en una matriz 2D:
-    # filas = genes, columnas = posiciones MSA, valores = suma de muestras.
-    # fill_value=0 rellena con cero las combinaciones gen/posición sin datos.
-    # reindex garantiza el orden fijo KRAS > HRAS > NRAS en el eje Y.
+    output_base = _output_base(output_basename)
+
     matrix = master_df.pivot_table(
-        index="gene",                   # Cada fila será un gen
-        columns="msa_position",         # Cada columna será una posición en el alineamiento múltiple
-        values="total_samples",         # El valor de cada celda es el total de muestras
-        aggfunc="sum",                  # Suma por si hay múltiples filas para la misma combinación
-        fill_value=0,                   # Posiciones sin datos se rellenan con cero (no NaN)
-    ).reindex(["KRAS", "HRAS", "NRAS"])  # Orden canónico de los parálogos en el eje de filas
+        index="gene",
+        columns="msa_position",
+        values="total_samples",
+        aggfunc="sum",
+        fill_value=0,
+    ).reindex(["KRAS", "HRAS", "NRAS"])
 
-    # Transformación logarítmica: log10(x+1) comprime el rango dinámico.
-    # Se suma 1 antes para evitar log10(0) = -inf (la pseudocuenta +1 es estándar en genómica).
     matrix = np.log10(matrix + 1)
 
-    fig, ax = plt.subplots(figsize=kwargs.get("figsize", (14, 3.2)))  # Crea figura; aspecto panorámico para caber todas las posiciones
+    # Figura
+    fig, ax = plt.subplots(figsize=kwargs.get("figsize", (14, 4.0)))
 
-    # sns.heatmap dibuja la matriz de colores con barra de color anotada.
-    # cmap="cividis": paleta perceptualmente uniforme y apta para daltonismo.
-    # cbar_kws permite etiquetar la barra de color con la unidad transformada.
-    sns.heatmap(matrix, cmap="cividis", cbar_kws={"label": "log10(muestras+1)"}, ax=ax)
+    sns.heatmap(
+        matrix,
+        cmap="cividis",
+        cbar_kws={"label": "log₁₀(muestras+1)", "shrink": 0.8},
+        ax=ax,
+        linecolor="white",
+    )
 
-    ax.set_xlabel("Posición MSA")   # Eje X: índice en el alineamiento múltiple de secuencias
-    ax.set_ylabel("")               # El eje Y ya muestra los nombres de gen; etiqueta vacía evita redundancia
-    ax.set_title("Carga de mutaciones somáticas en los parálogos RAS")  # Título descriptivo
+    ax.set_xlabel("Carga de mutaciones somáticas en los parálogos RAS", labelpad=25)
+    ax.set_ylabel("")
 
-    # Añade marcadores visuales sobre los hotspots oncogénicos canónicos.
-    # Se restan 1 a la posición porque el eje de columnas en el heatmap empieza en 0 (índice Python).
+
+    # =========================================================
+    # HOTSPOTS
+    # =========================================================
+
+    HOTSPOTS = {
+        12: "G12",
+        13: "G13",
+        59: "A59",
+        61: "Q61",
+        117: "K117",
+        146: "A146",
+    }
+
+    # offsets manuales para evitar choques entre posiciones cercanas
+    y_offsets = {
+        12: -0.25,
+        13: -0.05,
+        59: -0.25,
+        61: -0.05,
+        117: -0.05,
+        146: -0.05,
+    }
+
     for position, label in HOTSPOTS.items():
-        ax.axvline(position - 1, color="white", linewidth=1)                    # Línea vertical blanca en la columna del hotspot
-        ax.text(position - 0.5, -0.22, label, ha="center", va="bottom", fontsize=8)  # Etiqueta textual debajo del eje X
 
-    fig.tight_layout()  # Ajusta automáticamente márgenes para evitar solapamientos
-    return _save_png_svg(fig, output_base)  # Guarda PNG (300 dpi) y SVG; cierra la figura
+        # línea vertical (heatmap usa índice de columnas → position - 1)
+        ax.axvline(position - 0.5, color="black", linewidth=0.8, linestyle="--")
+
+        # etiqueta desplazada para evitar solapamiento
+        ax.text(
+            position - 0.5,
+            y_offsets.get(position, -0.15),
+            label,
+            ha="center",
+            va="bottom",
+            fontsize=8,
+            fontweight="bold",
+            bbox=dict(
+                boxstyle="round,pad=0.2",
+                facecolor="white",
+                edgecolor="gray",
+                linewidth=0.5,
+                alpha=0.9,
+            ),
+        )
+
+    ax.grid(False)
+
+
+    fig.subplots_adjust(top=0.88, bottom=0.30)
+
+    fig.tight_layout()
+
+    return _save_png_svg(fig, output_base)
 
 
 def clustermap_top_positions(master_df, top_n=30, output_basename=None):
@@ -385,8 +431,14 @@ def scatter_sasa_distance(master_df, output_basename):
         plot_df["uniprot_position"].isin(HOTSPOTS) & plot_df["total_samples"].gt(0)
     ]
     for row in annotated.itertuples():  # Itera como namedtuples para acceso eficiente por atributo
-        ax.text(row.sasa_rel, row.dist_active_site_angstrom,
-                f"{row.gene} {row.aa_wt}{row.uniprot_position}", fontsize=7)  # Etiqueta "KRAS G12", etc.
+        ax.annotate(
+            f"{row.gene} {row.aa_wt}{row.uniprot_position}",
+            (row.sasa_rel, row.dist_active_site_angstrom),
+            ha="center",
+            va="center",
+            fontsize=5,
+            color="black",
+        )
 
     fig.tight_layout()  # Ajusta márgenes automáticamente
     return _save_png_svg(fig, output_base)  # Guarda PNG y SVG; libera memoria

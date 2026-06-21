@@ -1,0 +1,13 @@
+Recurso,Versión,Tipo,Uso en el pipeline
+Python,3.11.15,Lenguaje,Lenguaje base del pipeline
+conda-forge,26.1.0,Entorno,Gestión del entorno y dependencias
+pandas,3.0.3,Librería,Manipulación y curación del dataset COSMIC
+NumPy,2.4.6,Librería,Cálculo vectorizado de distancias (broadcasting)
+BioPython,1.87,Librería,"Parseo PDB, MSA, SASA (Shrake-Rupley), SeqIO"
+FreeSASA,2.2.1,Librería,Cálculo alternativo de SASA (fallback DSSP)
+Matplotlib,3.10.9,Librería,Generación de figuras y tabla del MSA
+seaborn,0.13.2,Librería,Heatmaps y visualizaciones estadísticas
+py3Dmol,2.5.4,Librería,Visualización molecular 3D interactiva
+COSMIC v.104,v.104,Base datos,Mutaciones somáticas missense de KRAS/HRAS/NRAS
+RCSB PDB,REST API (2026),Base datos,"Estructuras cristalográficas 3D (4OBE, 3K8Y, 5UHV)"
+UniProt,REST API (2026),Base datos,Secuencias canónicas y anotaciones funcionales

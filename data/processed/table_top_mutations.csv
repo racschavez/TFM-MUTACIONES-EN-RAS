@@ -1,0 +1,433 @@
+gene,position,mutation,total_samples,wt_aa,mut_aa,sasa_rel,dist_active_site_angstrom,shannon_entropy,recurrent,n_members_mutated,tumor_types,primary_tissues
+KRAS,12,p.G12A,11564,G,A,0.0955,3.8449,-0.0000,True,3,aberrant_crypt_foci | adenoma | carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | glioma | haematopoietic_neoplasm | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | neuroblastoma | other | rhabdomyosarcoma | serrated_polyp | thymic_carcinoma,NS | autonomic_ganglia | biliary_tract | breast | central_nervous_system | cervix | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | oesophagus | ovary | pancreas | skin | small_intestine | soft_tissue | stomach | testis | thymus | upper_aerodigestive_tract | urinary_tract
+KRAS,12,p.G12W,11564,G,W,0.0955,3.8449,-0.0000,True,3,carcinoma,large_intestine
+KRAS,12,p.G12C,11564,G,C,0.0955,3.8449,-0.0000,True,3,aberrant_crypt_foci | adenoma | angiosarcoma | carcinoid-endocrine_tumour | carcinoma | endometriosis | germ_cell_tumour | haemangioma | haematopoietic_neoplasm | hyperplasia | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | other | pancreatic_intraepithelial_neoplasia_(PanIN) | rhabdomyosarcoma | sarcoma | serrated_polyp | synovial_sarcoma,NS | biliary_tract | breast | cervix | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | oesophagus | ovary | pancreas | peritoneum | prostate | salivary_gland | skin | small_intestine | soft_tissue | stomach | testis | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,12,p.G12L,11564,G,L,0.0955,3.8449,-0.0000,True,3,carcinoma,large_intestine | pancreas
+KRAS,12,p.G12R,11564,G,R,0.0955,3.8449,-0.0000,True,3,adenoma | carcinoid-endocrine_tumour | carcinoma | fibrosarcoma | germ_cell_tumour | haematopoietic_neoplasm | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | other | pancreatic_intraepithelial_neoplasia_(PanIN),NS | biliary_tract | bone | breast | central_nervous_system | cervix | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | lung | oesophagus | ovary | pancreas | prostate | skin | small_intestine | soft_tissue | stomach | testis | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,12,p.G12S,11564,G,S,0.0955,3.8449,-0.0000,True,3,adenoma | carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | other,biliary_tract | breast | cervix | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | lung | oesophagus | ovary | pancreas | peritoneum | prostate | small_intestine | stomach | testis | thyroid | urinary_tract
+KRAS,12,p.G12F,11564,G,F,0.0955,3.8449,-0.0000,True,3,carcinoma | other,breast | large_intestine | lung
+KRAS,12,p.G12N,11564,G,N,0.0955,3.8449,-0.0000,True,3,other,pancreas
+KRAS,12,p.G12I,11564,G,I,0.0955,3.8449,-0.0000,True,3,carcinoma | malignant_melanoma,pancreas | skin
+KRAS,12,p.G12V,11564,G,V,0.0955,3.8449,-0.0000,True,3,Wilms_tumour | aberrant_crypt_foci | adenoma | angiosarcoma | carcinoid-endocrine_tumour | carcinoma | carcinoma_in_situ | gastrointestinal_stromal_tumour | germ_cell_tumour | haematopoietic_neoplasm | hyperplasia | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | neuroblastoma | other | pancreatic_intraepithelial_neoplasia_(PanIN) | rhabdomyosarcoma | serrated_polyp | sex_cord-stromal_tumour | undifferentiated_sarcoma,NS | autonomic_ganglia | biliary_tract | breast | cervix | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | oesophagus | ovary | pancreas | peritoneum | prostate | skin | small_intestine | soft_tissue | stomach | testis | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,12,p.G12D,11564,G,D,0.0955,3.8449,-0.0000,True,3,Ewing_sarcoma-peripheral_primitive_neuroectodermal_tumour | NS | Overgrowth_syndrome | Wilms_tumour | aberrant_crypt_foci | adenoma | adnexal_tumour | angiosarcoma | benign_melanocytic_nevus | carcinoid-endocrine_tumour | carcinoma | endometrial_stromal_sarcoma | endometriosis | epidermal_nevus | germ_cell_tumour | glioma | haemangioma | haematopoietic_neoplasm | hyperplasia | inflammatory_myofibroblastic_tumour | leiomyosarcoma | lipoma | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | neuroblastoma | other | pancreatic_intraepithelial_neoplasia_(PanIN) | perineurioma | primitive_neuroectodermal_tumour-medulloblastoma | rhabdomyosarcoma | sarcoma | serrated_polyp,NS | autonomic_ganglia | biliary_tract | bone | breast | central_nervous_system | cervix | endometrium | gastrointestinal_tract_(site_indeterminate) | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | oesophagus | ovary | pancreas | peritoneum | prostate | skin | small_intestine | soft_tissue | stomach | testis | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,13,p.G13R,1917,G,R,0.0677,2.8209,-0.0000,True,3,carcinoma | haemangioma | lymphoid_neoplasm | other,biliary_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | soft_tissue | stomach | thyroid | urinary_tract
+KRAS,13,p.G13D,1917,G,D,0.0677,2.8209,-0.0000,True,3,NS | aberrant_crypt_foci | adenoma | angiosarcoma | carcinoid-endocrine_tumour | carcinoma | endometriosis | germ_cell_tumour | haematopoietic_neoplasm | hyperplasia | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | other | rhabdomyosarcoma | serrated_polyp,NS | biliary_tract | breast | cervix | endometrium | gastrointestinal_tract_(site_indeterminate) | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | oesophagus | ovary | pancreas | peritoneum | prostate | salivary_gland | skin | small_intestine | soft_tissue | stomach | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,13,p.G13S,1917,G,S,0.0677,2.8209,-0.0000,True,3,adenoma | carcinoma | germ_cell_tumour,kidney | large_intestine | prostate | testis | thyroid
+KRAS,13,p.G13E,1917,G,E,0.0677,2.8209,-0.0000,True,3,carcinoma,endometrium | lung
+KRAS,13,p.G13P,1917,G,P,0.0677,2.8209,-0.0000,True,3,other,pancreas
+KRAS,13,p.G13V,1917,G,V,0.0677,2.8209,-0.0000,True,3,adenoma | carcinoma | germ_cell_tumour,biliary_tract | endometrium | large_intestine | lung | pancreas | small_intestine | testis
+KRAS,13,p.G13C,1917,G,C,0.0677,2.8209,-0.0000,True,3,adenoma | angiosarcoma | carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | other | sarcoma | undifferentiated-unclassified_sarcoma,NS | biliary_tract | breast | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | liver | lung | ovary | pancreas | small_intestine | soft_tissue | stomach | upper_aerodigestive_tract
+KRAS,13,p.G13A,1917,G,A,0.0677,2.8209,-0.0000,True,3,adenoma-nodule-goitre | carcinoma | malignant_peripheral_nerve_sheath_tumour | other,large_intestine | pancreas | soft_tissue | thyroid
+NRAS,61,p.Q61K,1517,Q,K,0.1707,4.7433,-0.0000,True,3,adenoma | adenoma-nodule-goitre | adnexal_tumour | angiosarcoma | benign_melanocytic_nevus | carcinoid-endocrine_tumour | carcinoma | fibroepithelial_neoplasm | fibrosarcoma | germ_cell_tumour | glioma | haemangioma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | melanocytosis | mesothelioma | neuroblastoma | other | pulmonary_blastoma | rhabdomyosarcoma | thymic_carcinoma,NS | autonomic_ganglia | biliary_tract | breast | central_nervous_system | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | liver | lung | meninges | ovary | pancreas | peritoneum | pleura | prostate | skin | small_intestine | soft_tissue | stomach | testis | thymus | thyroid | upper_aerodigestive_tract | urinary_tract
+NRAS,61,p.Q61R,1517,Q,R,0.1707,4.7433,-0.0000,True,3,Ewing_sarcoma-peripheral_primitive_neuroectodermal_tumour | adenoma | adenoma-nodule-goitre | adrenal_cortical_carcinoma | benign_melanocytic_nevus | carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | glioma | haemangioma | haematopoietic_neoplasm | hyperplasia | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | melanocytosis | other | rhabdomyosarcoma | thymoma | undifferentiated_sarcoma,NS | adrenal_gland | biliary_tract | bone | breast | central_nervous_system | cervix | endometrium | eye | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | meninges | oesophagus | ovary | pancreas | prostate | salivary_gland | skin | small_intestine | soft_tissue | stomach | thymus | thyroid | upper_aerodigestive_tract | urinary_tract
+NRAS,61,p.Q61H,1517,Q,H,0.1707,4.7433,-0.0000,True,3,adenoma | benign_melanocytic_nevus | carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other | rhabdomyosarcoma | thymic_carcinoma,NS | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | liver | lung | skin | soft_tissue | testis | thymus | thyroid | upper_aerodigestive_tract
+NRAS,61,p.Q61E,1517,Q,E,0.1707,4.7433,-0.0000,True,3,adenoma-nodule-goitre,thyroid
+NRAS,61,p.Q61P,1517,Q,P,0.1707,4.7433,-0.0000,True,3,carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm,biliary_tract | haematopoietic_and_lymphoid_tissue | large_intestine | testis
+NRAS,61,p.Q61L,1517,Q,L,0.1707,4.7433,-0.0000,True,3,adenoma | angiosarcoma | benign_melanocytic_nevus | carcinoma | glioma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | neuroblastoma | other | sarcoma,NS | autonomic_ganglia | central_nervous_system | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | liver | lung | pancreas | skin | soft_tissue | stomach | thyroid | upper_aerodigestive_tract | urinary_tract
+NRAS,12,p.G12N,728,G,N,0.1496,3.4063,-0.0000,True,3,malignant_melanoma,skin
+NRAS,12,p.G12R,728,G,R,0.1496,3.4063,-0.0000,True,3,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma,endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | skin
+NRAS,12,p.G12C,728,G,C,0.1496,3.4063,-0.0000,True,3,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other,breast | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | skin | stomach | urinary_tract
+NRAS,12,p.G12A,728,G,A,0.1496,3.4063,-0.0000,True,3,carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | rhabdomyosarcoma,endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | skin | soft_tissue | testis
+NRAS,12,p.G12D,728,G,D,0.1496,3.4063,-0.0000,True,3,adenoma | carcinoma | germ_cell_tumour | glioma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | olfactory_neuroblastoma | other | rhabdomyosarcoma,NS | autonomic_ganglia | biliary_tract | central_nervous_system | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | lung | ovary | pancreas | prostate | salivary_gland | skin | small_intestine | soft_tissue | upper_aerodigestive_tract | urinary_tract
+NRAS,12,p.G12S,728,G,S,0.1496,3.4063,-0.0000,True,3,carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma,NS | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | skin
+NRAS,12,p.G12V,728,G,V,0.1496,3.4063,-0.0000,True,3,adenoma | carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma,haematopoietic_and_lymphoid_tissue | large_intestine | oesophagus | prostate | skin | testis
+KRAS,61,p.Q61P,542,Q,P,0.6428,10.6844,-0.0000,True,3,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other,NS | haematopoietic_and_lymphoid_tissue | large_intestine | lung | skin
+KRAS,61,p.Q61E,542,Q,E,0.6428,10.6844,-0.0000,True,3,NS | carcinoma,large_intestine | lung | urinary_tract
+KRAS,61,p.Q61R,542,Q,R,0.6428,10.6844,-0.0000,True,3,carcinoma | germ_cell_tumour | lymphoid_neoplasm | malignant_melanoma | other,biliary_tract | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | prostate | skin | stomach | thyroid
+KRAS,61,p.Q61L,542,Q,L,0.6428,10.6844,-0.0000,True,3,carcinoma | germ_cell_tumour | glioma | haematopoietic_neoplasm | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | other | pancreatic_intraepithelial_neoplasia_(PanIN) | rhabdomyosarcoma,biliary_tract | breast | central_nervous_system | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | lung | ovary | pancreas | penis | prostate | skin | soft_tissue | testis | thyroid | urinary_tract
+KRAS,61,p.Q61H,542,Q,H,0.6428,10.6844,-0.0000,True,3,NS | adenoma | carcinoid-endocrine_tumour | carcinoma | endometriosis | glioma | haematopoietic_neoplasm | hyperplasia | low_malignant_potential_(borderline)_tumour | lymphoid_neoplasm | malignant_melanoma | other | pancreatic_intraepithelial_neoplasia_(PanIN) | primitive_neuroectodermal_tumour-medulloblastoma,NS | biliary_tract | central_nervous_system | endometrium | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | liver | lung | ovary | pancreas | prostate | skin | small_intestine | stomach | thyroid | urinary_tract
+KRAS,61,p.Q61K,542,Q,K,0.6428,10.6844,-0.0000,True,3,NS | carcinoma | malignant_melanoma,large_intestine | lung | pancreas | prostate | skin | stomach | thyroid | urinary_tract
+KRAS,61,p.Q61A,542,Q,A,0.6428,10.6844,-0.0000,True,3,carcinoma,pancreas
+HRAS,61,p.Q61K,365,Q,K,0.1882,4.1459,-0.0000,True,3,adenoma-nodule-goitre | carcinoma | germ_cell_tumour | in_situ_neoplasm | malignant_melanoma | neuroblastoma | other | papilloma | paraganglioma | pheochromocytoma | rhabdomyosarcoma,adrenal_gland | autonomic_ganglia | bone | breast | lung | oesophagus | prostate | salivary_gland | skin | soft_tissue | testis | thyroid | upper_aerodigestive_tract | urinary_tract | vulva
+HRAS,61,p.Q61H,365,Q,H,0.1882,4.1459,-0.0000,True,3,carcinoma | malignant_melanoma,skin | upper_aerodigestive_tract
+HRAS,61,p.Q61L,365,Q,L,0.1882,4.1459,-0.0000,True,3,angiosarcoma | benign_melanocytic_nevus | carcinoma | glioma | malignant_melanoma | other | rhabdomyosarcoma | thymic_carcinoma,breast | central_nervous_system | liver | lung | prostate | skin | soft_tissue | stomach | thymus | thyroid | upper_aerodigestive_tract | urinary_tract | vulva
+HRAS,61,p.Q61R,365,Q,R,0.1882,4.1459,-0.0000,True,3,angiosarcoma | benign_melanocytic_nevus | carcinoid-endocrine_tumour | carcinoma | epidermal_nevus | germ_cell_tumour | haemangioma | low_malignant_potential_(borderline)_tumour | malignant_melanoma | other | paraganglioma | pheochromocytoma | thymic_carcinoma | thymoma,adrenal_gland | autonomic_ganglia | breast | genital_tract | large_intestine | lung | ovary | pancreas | prostate | salivary_gland | skin | soft_tissue | stomach | testis | thymus | thyroid | upper_aerodigestive_tract | urinary_tract
+NRAS,13,p.G13R,364,G,R,0.0918,3.0937,-0.0000,True,3,benign_melanocytic_nevus | carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | glioma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | neuroblastoma | other | pulmonary_blastoma | rhabdomyosarcoma,autonomic_ganglia | biliary_tract | breast | central_nervous_system | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pleura | skin | small_intestine | soft_tissue | stomach | testis | thyroid | urinary_tract
+NRAS,13,p.G13C,364,G,C,0.0918,3.0937,-0.0000,True,3,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma,biliary_tract | haematopoietic_and_lymphoid_tissue | large_intestine | skin
+NRAS,13,p.G13D,364,G,D,0.0918,3.0937,-0.0000,True,3,angiosarcoma | carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other,endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | skin | soft_tissue | upper_aerodigestive_tract
+NRAS,13,p.G13S,364,G,S,0.0918,3.0937,-0.0000,True,3,carcinoid-endocrine_tumour | carcinoma | haematopoietic_neoplasm | malignant_melanoma,biliary_tract | haematopoietic_and_lymphoid_tissue | pancreas | skin
+NRAS,13,p.G13A,364,G,A,0.0918,3.0937,-0.0000,True,3,carcinoma | malignant_melanoma | sarcoma,cervix | skin | soft_tissue
+NRAS,13,p.G13F,364,G,F,0.0918,3.0937,-0.0000,True,3,carcinoma,lung
+NRAS,13,p.G13V,364,G,V,0.0918,3.0937,-0.0000,True,3,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | primitive_neuroectodermal_tumour-medulloblastoma | rhabdomyosarcoma,central_nervous_system | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | skin | soft_tissue
+KRAS,146,p.A146S,346,A,S,0.0000,2.7839,-0.0000,True,2,carcinoma,biliary_tract
+KRAS,146,p.A146T,346,A,T,0.0000,2.7839,-0.0000,True,2,adenoma | carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other | rhabdomyosarcoma,NS | biliary_tract | cervix | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | ovary | pancreas | peritoneum | skin | soft_tissue | stomach | upper_aerodigestive_tract | urinary_tract
+KRAS,146,p.A146P,346,A,P,0.0000,2.7839,-0.0000,True,2,carcinoma | germ_cell_tumour | lymphoid_neoplasm,genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | pancreas | small_intestine | stomach
+KRAS,146,p.A146V,346,A,V,0.0000,2.7839,-0.0000,True,2,adenoma | carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | other,NS | biliary_tract | endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | oesophagus | small_intestine | testis | thyroid
+HRAS,13,p.G13K,323,G,K,0.0000,3.1007,-0.0000,True,3,malignant_melanoma,skin
+HRAS,13,p.G13D,323,G,D,0.0000,3.1007,-0.0000,True,3,carcinoma | malignant_melanoma,NS | biliary_tract | endometrium | oesophagus | skin | stomach | thyroid | upper_aerodigestive_tract | urinary_tract
+HRAS,13,p.G13V,323,G,V,0.0000,3.1007,-0.0000,True,3,angiosarcoma | carcinoma | malignant_melanoma | other,biliary_tract | breast | cervix | large_intestine | lung | salivary_gland | skin | soft_tissue | stomach | thyroid | upper_aerodigestive_tract | urinary_tract
+HRAS,13,p.G13C,323,G,C,0.0000,3.1007,-0.0000,True,3,carcinoma | malignant_melanoma | thymoma,NS | lung | thymus | upper_aerodigestive_tract | urinary_tract
+HRAS,13,p.G13R,323,G,R,0.0000,3.1007,-0.0000,True,3,adnexal_tumour | benign_melanocytic_nevus | carcinoma | epidermal_nevus | malignant_ectomesenchymoma | malignant_melanoma | neuroblastoma | other | paraganglioma | pheochromocytoma | rhabdomyosarcoma | thymoma,adrenal_gland | autonomic_ganglia | breast | lung | prostate | salivary_gland | skin | soft_tissue | thymus | thyroid | upper_aerodigestive_tract | urinary_tract
+HRAS,13,p.G13S,323,G,S,0.0000,3.1007,-0.0000,True,3,carcinoma | haemangioma | malignant_melanoma,large_intestine | skin | soft_tissue | stomach
+HRAS,13,p.G13N,323,G,N,0.0000,3.1007,-0.0000,True,3,undifferentiated_sarcoma,soft_tissue
+HRAS,12,p.G12S,195,G,S,0.0103,3.4602,-0.0000,True,3,carcinoma | malignant_melanoma | other | rhabdomyosarcoma | thymic_carcinoma,bone | endometrium | large_intestine | oesophagus | prostate | skin | soft_tissue | stomach | thymus | upper_aerodigestive_tract | urinary_tract | vulva
+HRAS,12,p.G12D,195,G,D,0.0103,3.4602,-0.0000,True,3,adnexal_tumour | carcinoma | fibroepithelial_neoplasm | malignant_melanoma | other | rhabdomyosarcoma,NS | biliary_tract | breast | skin | soft_tissue | upper_aerodigestive_tract | urinary_tract
+HRAS,12,p.G12V,195,G,V,0.0103,3.4602,-0.0000,True,3,adenoma | adenoma-nodule-goitre | carcinoma | glioma | in_situ_epithelial_neoplasm | malignant_melanoma,biliary_tract | central_nervous_system | cervix | lung | pituitary | skin | thyroid | upper_aerodigestive_tract | urinary_tract
+HRAS,12,p.G12A,195,G,A,0.0103,3.4602,-0.0000,True,3,carcinoma,upper_aerodigestive_tract
+HRAS,12,p.G12N,195,G,N,0.0103,3.4602,-0.0000,True,3,carcinoma | malignant_melanoma,skin
+HRAS,12,p.G12C,195,G,C,0.0103,3.4602,-0.0000,True,3,carcinoma | epidermal_nevus | rhabdomyosarcoma,breast | salivary_gland | skin | soft_tissue | upper_aerodigestive_tract | urinary_tract
+HRAS,12,p.G12R,195,G,R,0.0103,3.4602,-0.0000,True,3,adenoma | carcinoma,pituitary | thyroid | urinary_tract
+KRAS,117,p.K117E,104,K,E,0.0453,3.2132,-0.0000,True,2,carcinoma,large_intestine
+KRAS,117,p.K117N,104,K,N,0.0453,3.2132,-0.0000,True,2,adenoma | carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | myxoma | neuroblastoma | rhabdomyosarcoma,autonomic_ganglia | haematopoietic_and_lymphoid_tissue | large_intestine | oesophagus | prostate | skin | small_intestine | soft_tissue | stomach
+KRAS,117,p.K117R,104,K,R,0.0453,3.2132,-0.0000,True,2,carcinoma | germ_cell_tumour | lymphoid_neoplasm,genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | small_intestine
+KRAS,59,p.A59T,60,A,T,0.0994,5.3538,-0.0000,True,2,carcinoma | germ_cell_tumour | lymphoid_neoplasm,endometrium | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung | stomach
+KRAS,59,p.A59V,60,A,V,0.0994,5.3538,-0.0000,True,2,carcinoma,thyroid
+KRAS,59,p.A59D,60,A,D,0.0994,5.3538,-0.0000,True,2,carcinoma,large_intestine
+KRAS,59,p.A59G,60,A,G,0.0994,5.3538,-0.0000,True,2,carcinoma | lymphoid_neoplasm,biliary_tract | breast | endometrium | haematopoietic_and_lymphoid_tissue | kidney | large_intestine | pancreas | thyroid | urinary_tract
+KRAS,59,p.A59E,60,A,E,0.0994,5.3538,-0.0000,True,2,carcinoma | lymphoid_neoplasm | other,endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | pancreas
+KRAS,19,p.L19F,40,L,F,0.0000,5.1210,-0.0000,False,1,carcinoma | germ_cell_tumour | lymphoid_neoplasm | primitive_neuroectodermal_tumour-medulloblastoma,biliary_tract | central_nervous_system | haematopoietic_and_lymphoid_tissue | large_intestine | lung | ovary | pancreas | stomach | upper_aerodigestive_tract | urinary_tract
+KRAS,14,p.V14I,31,V,I,0.0000,3.3444,-0.0000,False,1,adenoma | carcinoma | glioma | lymphoid_neoplasm | other,biliary_tract | central_nervous_system | cervix | endometrium | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | peritoneum | small_intestine | stomach | upper_aerodigestive_tract
+KRAS,14,p.V14L,31,V,L,0.0000,3.3444,-0.0000,False,1,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,22,p.Q22R,24,Q,R,0.0000,7.9422,-0.0000,False,1,glioma | other,central_nervous_system | large_intestine
+KRAS,22,p.Q22H,24,Q,H,0.0000,7.9422,-0.0000,False,1,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine
+KRAS,22,p.Q22K,24,Q,K,0.0000,7.9422,-0.0000,False,1,carcinoid-endocrine_tumour | carcinoma | lymphoid_neoplasm | other | primitive_neuroectodermal_tumour-medulloblastoma,biliary_tract | central_nervous_system | haematopoietic_and_lymphoid_tissue | large_intestine | lung | pancreas | skin | small_intestine
+HRAS,117,p.K117N,16,K,N,0.0000,3.2847,-0.0000,True,2,carcinoma | malignant_melanoma,breast | lung | skin | thyroid | upper_aerodigestive_tract | urinary_tract
+KRAS,18,p.A18T,15,A,T,0.0000,2.8512,-0.0000,False,1,malignant_melanoma,skin
+KRAS,18,p.A18G,15,A,G,0.0000,2.8512,-0.0000,False,1,carcinoma,biliary_tract
+KRAS,18,p.A18V,15,A,V,0.0000,2.8512,-0.0000,False,1,carcinoma,pancreas
+KRAS,60,p.G60R,15,G,R,0.1083,7.7605,-0.0000,False,1,haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,60,p.G60S,15,G,S,0.1083,7.7605,-0.0000,False,1,germ_cell_tumour,genital_tract
+KRAS,60,p.G60V,15,G,V,0.1083,7.7605,-0.0000,False,1,germ_cell_tumour,genital_tract
+KRAS,18,p.A18D,15,A,D,0.0000,2.8512,-0.0000,False,1,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine | stomach
+KRAS,60,p.G60D,15,G,D,0.1083,7.7605,-0.0000,False,1,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine | prostate | skin | stomach | urinary_tract
+KRAS,10,p.G10R,14,G,R,0.0000,5.3895,-0.0000,False,1,carcinoma | other,large_intestine | liver | peritoneum
+KRAS,10,p.G10E,14,G,E,0.0000,5.3895,-0.0000,False,1,carcinoma | other,large_intestine | peritoneum
+KRAS,10,p.G10V,14,G,V,0.0000,5.3895,-0.0000,False,1,carcinoma,large_intestine | lung
+NRAS,59,p.A59S,12,A,S,0.0000,3.9729,-0.0000,True,2,glioma,central_nervous_system
+NRAS,59,p.A59D,12,A,D,0.0000,3.9729,-0.0000,True,2,carcinoma | haematopoietic_neoplasm | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | urinary_tract
+NRAS,59,p.A59T,12,A,T,0.0000,3.9729,-0.0000,True,2,carcinoma | haematopoietic_neoplasm | malignant_melanoma,haematopoietic_and_lymphoid_tissue | pancreas | skin
+NRAS,146,p.A146V,12,A,V,0.0000,2.8354,-0.0000,True,2,malignant_melanoma,skin
+NRAS,146,p.A146T,12,A,T,0.0000,2.8354,-0.0000,True,2,haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma,haematopoietic_and_lymphoid_tissue | skin
+KRAS,33,p.D33E,12,D,E,0.2381,4.3267,-0.0000,False,1,carcinoma | germ_cell_tumour | haematopoietic_neoplasm | lymphoid_neoplasm | malignant_melanoma | other,biliary_tract | genital_tract | haematopoietic_and_lymphoid_tissue | large_intestine | skin
+KRAS,63,p.E63K,11,E,K,0.3659,15.0961,-0.0000,False,1,carcinoid-endocrine_tumour | carcinoma | germ_cell_tumour | lymphoid_neoplasm | malignant_melanoma | primitive_neuroectodermal_tumour-medulloblastoma,central_nervous_system | genital_tract | haematopoietic_and_lymphoid_tissue | pancreas | skin | urinary_tract
+KRAS,63,p.E63Q,11,E,Q,0.3659,15.0961,-0.0000,False,1,carcinoma,breast
+KRAS,58,p.T58I,10,T,I,0.0000,4.5699,-0.0000,False,1,carcinoma | lymphoid_neoplasm,biliary_tract | haematopoietic_and_lymphoid_tissue | large_intestine | lung
+KRAS,34,p.P34R,10,P,R,0.2761,4.2487,-0.0000,False,1,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine | urinary_tract
+KRAS,34,p.P34Q,10,P,Q,0.2761,4.2487,-0.0000,False,1,carcinoma,large_intestine | skin
+KRAS,34,p.P34S,10,P,S,0.2761,4.2487,-0.0000,False,1,carcinoma,pancreas
+KRAS,34,p.P34L,10,P,L,0.2761,4.2487,-0.0000,False,1,carcinoma | other,biliary_tract | large_intestine | peritoneum
+KRAS,34,p.P34T,10,P,T,0.2761,4.2487,-0.0000,False,1,other,liver
+NRAS,60,p.G60V,9,G,V,0.0412,2.9171,-0.0000,False,1,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine
+NRAS,60,p.G60E,9,G,E,0.0412,2.9171,-0.0000,False,1,carcinoma | glioma | haematopoietic_neoplasm | lymphoid_neoplasm,central_nervous_system | haematopoietic_and_lymphoid_tissue | lung
+HRAS,59,p.A59T,9,A,T,0.0000,3.9274,-0.0000,True,2,angiosarcoma | carcinoma,large_intestine | oesophagus | soft_tissue | stomach | upper_aerodigestive_tract
+KRAS,20,p.T20M,9,T,M,0.0000,6.9520,-0.0000,False,0,carcinoma | other,large_intestine | peritoneum | stomach
+KRAS,20,p.T20R,9,T,R,0.0000,6.9520,-0.0000,False,0,carcinoma,endometrium
+KRAS,20,p.T20P,9,T,P,0.0000,6.9520,-0.0000,False,0,malignant_melanoma,skin
+KRAS,68,p.R68S,8,R,S,0.1369,15.0945,-0.0000,False,0,carcinoma,biliary_tract | large_intestine | salivary_gland
+KRAS,68,p.R68K,8,R,K,0.1369,15.0945,-0.0000,False,0,germ_cell_tumour,testis
+KRAS,119,p.D119H,8,D,H,0.0394,2.8572,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,119,p.D119G,8,D,G,0.0394,2.8572,-0.0000,False,0,carcinoma,liver
+KRAS,68,p.R68M,8,R,M,0.1369,15.0945,-0.0000,False,0,carcinoma,liver
+NRAS,132,p.E132G,7,E,G,0.1918,20.3885,0.9183,False,0,carcinoma,skin
+HRAS,119,p.D119H,7,D,H,0.1228,2.7989,-0.0000,False,0,malignant_melanoma | thymic_carcinoma,skin | thymus
+HRAS,119,p.D119N,7,D,N,0.1228,2.7989,-0.0000,False,0,carcinoma | thymoma,lung | thymus | upper_aerodigestive_tract | urinary_tract
+NRAS,132,p.E132K,7,E,K,0.1918,20.3885,0.9183,False,0,carcinoma,endometrium | large_intestine
+NRAS,64,p.Y64C,7,Y,C,0.2176,8.0518,-0.0000,False,0,haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,64,p.Y64D,7,Y,D,0.2176,8.0518,-0.0000,False,0,haematopoietic_neoplasm | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,64,p.Y64N,7,Y,N,0.2176,8.0518,-0.0000,False,0,haematopoietic_neoplasm | malignant_melanoma,haematopoietic_and_lymphoid_tissue | skin
+NRAS,62,p.E62K,6,E,K,0.3952,8.2453,-0.0000,False,0,carcinoma | malignant_melanoma,large_intestine | skin
+KRAS,31,p.E31Q,6,E,Q,0.6067,4.9265,-0.0000,False,0,carcinoma,thyroid
+KRAS,31,p.E31K,6,E,K,0.6067,4.9265,-0.0000,False,0,carcinoma | other,large_intestine | peritoneum | skin
+NRAS,62,p.E62Q,6,E,Q,0.3952,8.2453,-0.0000,False,0,malignant_melanoma,skin
+HRAS,73,p.R73C,6,R,C,0.4686,17.7832,-0.0000,False,0,carcinoma,biliary_tract | large_intestine | stomach
+HRAS,73,p.R73H,6,R,H,0.4686,17.7832,-0.0000,False,0,carcinoma,large_intestine | urinary_tract
+KRAS,5,p.K5N,6,K,N,0.1692,17.0524,-0.0000,False,0,carcinoma,stomach
+KRAS,5,p.K5E,6,K,E,0.1692,17.0524,-0.0000,False,0,carcinoma | glioma | haematopoietic_neoplasm,central_nervous_system | haematopoietic_and_lymphoid_tissue | large_intestine | liver
+HRAS,60,p.G60D,6,G,D,0.0000,2.7762,-0.0000,False,1,carcinoma,stomach | upper_aerodigestive_tract
+HRAS,60,p.G60S,6,G,S,0.0000,2.7762,-0.0000,False,1,carcinoma | glioma,central_nervous_system | large_intestine | stomach
+NRAS,91,p.A91V,5,A,V,0.3952,14.0267,0.9183,False,0,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine | stomach
+KRAS,147,p.K147T,5,K,T,0.2894,3.7063,-0.0000,False,0,carcinoma,large_intestine
+NRAS,54,p.D54Y,5,D,Y,0.0729,14.6415,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+NRAS,54,p.D54N,5,D,N,0.0729,14.6415,-0.0000,False,0,carcinoma,large_intestine
+KRAS,147,p.K147N,5,K,N,0.2894,3.7063,-0.0000,False,0,carcinoma,large_intestine | ovary | upper_aerodigestive_tract
+NRAS,54,p.D54G,5,D,G,0.0729,14.6415,-0.0000,False,0,carcinoma | lymphoid_neoplasm,breast | haematopoietic_and_lymphoid_tissue
+KRAS,23,p.L23I,5,L,I,0.0000,10.8707,-0.0000,False,0,carcinoma,large_intestine
+KRAS,23,p.L23R,5,L,R,0.0000,10.8707,-0.0000,False,0,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine
+KRAS,64,p.Y64D,5,Y,D,0.2897,17.3880,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,64,p.Y64N,5,Y,N,0.2897,17.3880,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+HRAS,31,p.E31D,5,E,D,0.3196,3.5502,-0.0000,False,0,malignant_melanoma,skin
+HRAS,31,p.E31K,5,E,K,0.3196,3.5502,-0.0000,False,0,carcinoma | glioma,central_nervous_system | endometrium | skin
+KRAS,147,p.K147E,5,K,E,0.2894,3.7063,-0.0000,False,0,carcinoma,large_intestine
+KRAS,64,p.Y64H,5,Y,H,0.2897,17.3880,-0.0000,False,0,carcinoma,large_intestine
+KRAS,11,p.A11G,4,A,G,0.0000,3.8637,-0.0000,False,0,carcinoma,small_intestine
+KRAS,11,p.A11T,4,A,T,0.0000,3.8637,-0.0000,False,0,carcinoma,pancreas
+KRAS,11,p.A11P,4,A,P,0.0000,3.8637,-0.0000,False,0,carcinoma,stomach
+KRAS,8,p.V8E,4,V,E,0.0000,6.9658,-0.0000,False,0,carcinoma,pancreas
+KRAS,162,p.E162Q,4,E,Q,0.0144,20.7121,-0.0000,False,0,carcinoma,oesophagus
+KRAS,62,p.E62G,4,E,G,0.1001,11.6817,-0.0000,False,0,carcinoma,skin
+KRAS,62,p.E62K,4,E,K,0.1001,11.6817,-0.0000,False,0,malignant_melanoma,skin
+KRAS,62,p.E62D,4,E,D,0.1001,11.6817,-0.0000,False,0,carcinoma,endometrium
+NRAS,63,p.E63K,4,E,K,0.4189,10.2634,-0.0000,False,1,germ_cell_tumour,genital_tract
+KRAS,57,p.D57N,4,D,N,0.0000,4.0968,-0.0000,False,0,carcinoma,large_intestine
+KRAS,11,p.A11V,4,A,V,0.0000,3.8637,-0.0000,False,0,carcinoma,stomach
+KRAS,36,p.I36M,4,I,M,0.1661,4.4521,-0.0000,False,0,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine
+NRAS,57,p.D57E,4,D,E,0.0000,3.9395,-0.0000,False,0,carcinoma,lung
+NRAS,63,p.E63Q,4,E,Q,0.4189,10.2634,-0.0000,False,1,carcinoma,prostate | stomach
+NRAS,57,p.D57N,4,D,N,0.0000,3.9395,-0.0000,False,0,carcinoma,large_intestine | urinary_tract
+NRAS,57,p.D57A,4,D,A,0.0000,3.9395,-0.0000,False,0,carcinoma,breast
+KRAS,116,p.N116H,4,N,H,0.0000,3.0593,-0.0000,False,0,carcinoma | other,large_intestine | oesophagus
+KRAS,15,p.G15S,4,G,S,0.0000,3.0301,-0.0000,False,0,carcinoma | haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue | stomach
+KRAS,65,p.S65I,4,S,I,0.0164,18.2079,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,26,p.N26Y,4,N,Y,0.2913,13.0203,-0.0000,False,0,carcinoma,urinary_tract
+KRAS,65,p.S65N,4,S,N,0.0164,18.2079,-0.0000,False,0,carcinoma,pancreas | thyroid
+HRAS,68,p.R68W,4,R,W,0.0958,8.7188,-0.0000,False,0,carcinoma,breast | large_intestine
+HRAS,68,p.R68L,4,R,L,0.0958,8.7188,-0.0000,False,0,carcinoma,urinary_tract
+KRAS,9,p.V9I,4,V,I,0.0000,7.0568,-0.0000,False,0,other,peritoneum
+HRAS,68,p.R68Q,4,R,Q,0.0958,8.7188,-0.0000,False,0,carcinoma,stomach
+KRAS,26,p.N26K,4,N,K,0.2913,13.0203,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,26,p.N26S,4,N,S,0.2913,13.0203,-0.0000,False,0,carcinoma,skin
+KRAS,26,p.N26I,4,N,I,0.2913,13.0203,-0.0000,False,0,carcinoma,large_intestine
+KRAS,8,p.V8I,4,V,I,0.0000,6.9658,-0.0000,False,0,carcinoma,large_intestine | stomach
+KRAS,9,p.V9D,4,V,D,0.0000,7.0568,-0.0000,False,0,other,liver
+HRAS,41,p.R41Q,4,R,Q,0.4352,14.9646,-0.0000,False,0,carcinoma,salivary_gland | stomach
+KRAS,162,p.E162K,4,E,K,0.0144,20.7121,-0.0000,False,0,glioma,central_nervous_system
+KRAS,15,p.G15C,4,G,C,0.0000,3.0301,-0.0000,False,0,carcinoma,cervix
+KRAS,15,p.G15D,4,G,D,0.0000,3.0301,-0.0000,False,0,other,peritoneum
+NRAS,111,p.M111K,3,M,K,0.0057,15.5983,-0.0000,False,0,carcinoma,skin
+NRAS,111,p.M111V,3,M,V,0.0057,15.5983,-0.0000,False,0,carcinoma,stomach | urinary_tract
+KRAS,51,p.C51R,3,C,R,0.0000,22.9331,-0.0000,False,0,carcinoma,large_intestine | skin
+KRAS,50,p.T50I,3,T,I,0.2786,26.4131,-0.0000,False,0,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | large_intestine
+KRAS,50,p.T50A,3,T,A,0.2786,26.4131,-0.0000,False,0,carcinoma,large_intestine
+NRAS,34,p.P34A,3,P,A,0.1367,3.5947,-0.0000,False,1,carcinoma,urinary_tract
+KRAS,35,p.T35A,3,T,A,0.4911,5.6088,-0.0000,False,0,carcinoma,oesophagus
+NRAS,50,p.T50P,3,T,P,0.4125,26.1891,-0.0000,False,0,carcinoma,breast
+KRAS,17,p.S17T,3,S,T,0.0000,2.0855,-0.0000,False,0,glioma,central_nervous_system
+KRAS,17,p.S17N,3,S,N,0.0000,2.0855,-0.0000,False,0,carcinoma | other,liver | peritoneum
+NRAS,34,p.P34L,3,P,L,0.1367,3.5947,-0.0000,False,1,malignant_melanoma,skin
+KRAS,111,p.M111L,3,M,L,0.0000,16.4036,-0.0000,False,0,carcinoma,lung
+NRAS,34,p.P34R,3,P,R,0.1367,3.5947,-0.0000,False,1,carcinoma,lung
+KRAS,111,p.M111V,3,M,V,0.0000,16.4036,-0.0000,False,0,adenoma | carcinoma,large_intestine | stomach
+HRAS,146,p.A146T,3,A,T,0.0000,2.8385,-0.0000,True,2,adnexal_tumour | carcinoma | malignant_melanoma,large_intestine | skin
+HRAS,134,p.A134S,3,A,S,0.0000,18.5941,-0.0000,False,0,carcinoid-endocrine_tumour,pancreas
+HRAS,134,p.A134T,3,A,T,0.0000,18.5941,-0.0000,False,0,carcinoma,large_intestine
+HRAS,143,p.E143K,3,E,K,0.0815,8.4353,-0.0000,False,0,carcinoma | malignant_melanoma,oesophagus | prostate | skin
+NRAS,48,p.G48S,3,G,S,0.5981,26.6916,-0.0000,False,0,carcinoma,large_intestine | stomach
+NRAS,48,p.G48D,3,G,D,0.5981,26.6916,-0.0000,False,0,carcinoma,large_intestine
+NRAS,50,p.T50I,3,T,I,0.4125,26.1891,-0.0000,False,0,malignant_melanoma,skin
+NRAS,22,p.Q22K,3,Q,K,0.0049,8.0334,-0.0000,False,1,fibroepithelial_neoplasm | malignant_melanoma,breast | skin
+KRAS,80,p.C80S,3,C,S,0.0051,9.7476,-0.0000,False,0,carcinoma,oesophagus
+KRAS,138,p.G138R,3,G,R,0.5938,22.7861,-0.0000,False,0,other,peritoneum
+KRAS,135,p.R135K,3,R,K,0.4482,21.4647,0.9183,False,0,carcinoma,large_intestine | stomach
+HRAS,123,p.R123H,3,R,H,0.1559,10.9198,-0.0000,False,0,carcinoma | lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue | skin | urinary_tract
+HRAS,91,p.E91K,3,E,K,0.2560,13.9618,0.9183,False,0,carcinoma,urinary_tract
+KRAS,138,p.G138E,3,G,E,0.5938,22.7861,-0.0000,False,0,carcinoma | other,large_intestine
+HRAS,91,p.E91Q,3,E,Q,0.2560,13.9618,0.9183,False,0,carcinoma,lung
+KRAS,135,p.R135T,3,R,T,0.4482,21.4647,0.9183,False,0,carcinoma,stomach
+HRAS,11,p.A11T,3,A,T,0.0000,3.9111,-0.0000,False,0,adenoma,large_intestine
+HRAS,11,p.A11D,3,A,D,0.0000,3.9111,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+HRAS,33,p.D33N,3,D,N,0.1583,4.4049,-0.0000,False,1,carcinoma | malignant_melanoma,skin | urinary_tract
+HRAS,33,p.D33Y,3,D,Y,0.1583,4.4049,-0.0000,False,1,carcinoma,large_intestine
+HRAS,64,p.Y64H,3,Y,H,0.2528,7.7565,-0.0000,False,0,carcinoma,breast | large_intestine
+HRAS,69,p.D69H,3,D,H,0.3395,14.8219,-0.0000,False,0,carcinoma,skin
+HRAS,69,p.D69N,3,D,N,0.3395,14.8219,-0.0000,False,0,carcinoma,thyroid
+HRAS,69,p.D69Y,3,D,Y,0.3395,14.8219,-0.0000,False,0,carcinoma,large_intestine
+HRAS,50,p.T50K,3,T,K,0.1566,26.6182,-0.0000,False,0,carcinoma,stomach
+HRAS,50,p.T50M,3,T,M,0.1566,26.6182,-0.0000,False,0,carcinoma,lung
+HRAS,48,p.G48R,3,G,R,0.1499,26.7898,-0.0000,False,0,carcinoma,prostate | salivary_gland
+HRAS,3,p.E3K,3,E,K,0.1610,20.3828,-0.0000,False,0,carcinoma,breast
+HRAS,17,p.S17G,3,S,G,0.0069,2.1360,-0.0000,False,0,adenoma-nodule-goitre | carcinoma,cervix | thyroid
+HRAS,17,p.S17T,3,S,T,0.0069,2.1360,-0.0000,False,0,carcinoma,stomach
+NRAS,76,p.E76K,3,E,K,0.1106,18.6532,-0.0000,False,0,carcinoma | glioma,central_nervous_system | large_intestine
+NRAS,85,p.N85S,3,N,S,0.0279,7.1919,-0.0000,False,0,carcinoma | haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue | liver
+KRAS,7,p.V7A,2,V,A,0.0000,11.0739,-0.0000,False,0,carcinoma | hyperplasia,endometrium
+NRAS,105,p.D105N,2,D,N,0.4014,22.8962,-0.0000,False,0,glioma,central_nervous_system
+NRAS,105,p.D105H,2,D,H,0.4014,22.8962,-0.0000,False,0,carcinoma,urinary_tract
+NRAS,148,p.T148S,2,T,S,0.3524,5.6874,-0.0000,False,0,haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,148,p.T148I,2,T,I,0.3524,5.6874,-0.0000,False,0,carcinoma,skin
+KRAS,6,p.L6P,2,L,P,0.0000,13.2790,-0.0000,False,0,carcinoma,breast
+HRAS,49,p.E49K,2,E,K,0.0937,26.0791,-0.0000,False,0,carcinoma | haemangioma,soft_tissue | stomach
+NRAS,154,p.D154H,2,D,H,0.2715,13.2633,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+NRAS,153,p.E153K,2,E,K,0.0979,11.6268,-0.0000,False,0,carcinoma,large_intestine
+NRAS,154,p.D154G,2,D,G,0.2715,13.2633,-0.0000,False,0,carcinoma,stomach
+KRAS,134,p.A134V,2,A,V,0.0000,18.4531,-0.0000,False,0,carcinoma,large_intestine
+KRAS,134,p.A134T,2,A,T,0.0000,18.4531,-0.0000,False,0,other,large_intestine
+KRAS,164,p.R164Q,2,R,Q,0.0629,24.1473,-0.0000,False,0,carcinoma | glioma,central_nervous_system | endometrium
+HRAS,92,p.D92N,2,D,N,0.0632,10.1116,-0.0000,False,0,carcinoma,skin
+HRAS,81,p.V81M,2,V,M,0.0000,6.4188,-0.0000,False,0,carcinoma,biliary_tract
+HRAS,74,p.T74P,2,T,P,0.2034,18.2920,-0.0000,False,0,carcinoma,kidney
+HRAS,74,p.T74A,2,T,A,0.2034,18.2920,-0.0000,False,0,carcinoma,endometrium
+NRAS,153,p.E153A,2,E,A,0.0979,11.6268,-0.0000,False,0,carcinoma,skin
+HRAS,2,p.T2M,2,T,M,0.1786,24.3684,-0.0000,False,0,carcinoma,urinary_tract
+HRAS,16,p.K16R,2,K,R,0.0000,2.6332,-0.0000,False,0,carcinoma,skin
+KRAS,149,p.R149K,2,R,K,0.1401,6.9715,-0.0000,False,0,carcinoma,stomach
+HRAS,16,p.K16T,2,K,T,0.0000,2.6332,-0.0000,False,0,thymoma,thymus
+HRAS,22,p.Q22K,2,Q,K,0.0000,8.1681,-0.0000,False,1,carcinoma,upper_aerodigestive_tract
+HRAS,2,p.T2K,2,T,K,0.1786,24.3684,-0.0000,False,0,carcinoma,large_intestine
+HRAS,10,p.G10A,2,G,A,0.0000,4.7851,-0.0000,False,1,carcinoma,breast
+KRAS,149,p.R149G,2,R,G,0.1401,6.9715,-0.0000,False,0,carcinoma,large_intestine
+HRAS,58,p.T58A,2,T,A,0.0000,4.1906,-0.0000,False,1,carcinoma,thyroid
+HRAS,66,p.A66T,2,A,T,0.4794,12.6974,-0.0000,False,0,carcinoma,breast | large_intestine
+HRAS,58,p.T58I,2,T,I,0.0000,4.1906,-0.0000,False,1,carcinoma,skin
+KRAS,158,p.T158A,2,T,A,0.0546,17.1184,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+KRAS,6,p.L6H,2,L,H,0.0000,13.2790,-0.0000,False,0,carcinoma,large_intestine
+NRAS,131,p.H131R,2,H,R,0.2320,16.5497,0.9183,False,0,malignant_melanoma,skin
+NRAS,112,p.V112L,2,V,L,0.0000,13.3264,-0.0000,False,0,carcinoma,skin
+KRAS,54,p.D54G,2,D,G,0.0111,15.0299,-0.0000,False,0,carcinoma,large_intestine
+NRAS,68,p.R68T,2,R,T,0.0687,7.8804,-0.0000,False,0,malignant_melanoma,skin
+NRAS,67,p.M67T,2,M,T,0.3328,11.3608,-0.0000,False,0,carcinoma,large_intestine
+NRAS,67,p.M67I,2,M,I,0.3328,11.3608,-0.0000,False,0,carcinoma,endometrium
+NRAS,66,p.A66T,2,A,T,0.5508,13.4680,-0.0000,False,0,carcinoma,large_intestine
+KRAS,54,p.D54N,2,D,N,0.0111,15.0299,-0.0000,False,0,germ_cell_tumour,testis
+NRAS,65,p.S65N,2,S,N,0.2484,10.9166,-0.0000,False,0,carcinoma | other,breast | large_intestine
+NRAS,164,p.R164C,2,R,C,0.1003,24.5961,-0.0000,False,0,carcinoma,endometrium | large_intestine
+KRAS,41,p.R41K,2,R,K,0.2269,15.4182,-0.0000,False,0,carcinoma,skin
+NRAS,49,p.E49K,2,E,K,0.0932,25.9513,-0.0000,False,0,carcinoma | malignant_melanoma,skin | urinary_tract
+KRAS,108,p.D108N,2,D,N,0.3451,23.5943,-0.0000,False,0,carcinoma,large_intestine
+KRAS,115,p.G115E,2,G,E,0.0000,7.2415,-0.0000,False,0,carcinoma,large_intestine
+KRAS,115,p.G115R,2,G,R,0.0000,7.2415,-0.0000,False,0,malignant_melanoma,skin
+KRAS,102,p.R102I,2,R,I,0.4121,21.5310,-0.0000,False,0,carcinoma,large_intestine
+KRAS,27,p.H27L,2,H,L,0.3386,9.5643,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,33,p.D33Y,2,D,Y,0.0909,4.2364,-0.0000,False,1,carcinoma,large_intestine
+NRAS,17,p.S17T,2,S,T,0.0000,2.0983,-0.0000,False,0,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,126,p.D126E,2,D,E,0.3563,15.4792,0.9183,False,0,carcinoma,large_intestine
+KRAS,126,p.D126V,2,D,V,0.3563,15.4792,0.9183,False,0,carcinoma,breast
+NRAS,17,p.S17N,2,S,N,0.0000,2.0983,-0.0000,False,0,carcinoma,stomach
+KRAS,121,p.P121H,2,P,H,0.4651,7.1334,0.9183,False,0,carcinoma,large_intestine | stomach
+KRAS,130,p.A130V,2,A,V,0.0000,14.8394,-0.0000,False,0,carcinoma | other,pancreas | peritoneum
+KRAS,84,p.I84M,2,I,M,0.0000,8.0937,-0.0000,False,0,carcinoma,large_intestine | lung
+NRAS,24,p.I24F,2,I,F,0.0769,12.2011,-0.0000,False,0,carcinoma,skin
+NRAS,24,p.I24L,2,I,L,0.0769,12.2011,-0.0000,False,0,carcinoma,breast
+KRAS,24,p.I24N,2,I,N,0.0372,12.2726,-0.0000,False,0,carcinoma | lymphoid_neoplasm,endometrium | haematopoietic_and_lymphoid_tissue
+KRAS,21,p.I21R,2,I,R,0.0129,6.7380,-0.0000,False,0,carcinoma,cervix
+KRAS,21,p.I21K,2,I,K,0.0129,6.7380,-0.0000,False,0,carcinoma,stomach
+NRAS,33,p.D33H,2,D,H,0.0909,4.2364,-0.0000,False,1,carcinoma,endometrium
+HRAS,145,p.S145L,2,S,L,0.0000,3.4337,-0.0000,False,0,carcinoma,endometrium | penis
+KRAS,140,p.P140S,2,P,S,0.1565,16.7275,-0.0000,False,0,other,peritoneum
+KRAS,143,p.E143G,2,E,G,0.0567,8.3778,-0.0000,False,0,carcinoma,NS
+KRAS,143,p.E143K,2,E,K,0.0567,8.3778,-0.0000,False,0,carcinoma,large_intestine
+HRAS,156,p.F156L,2,F,L,0.0151,10.3742,-0.0000,False,0,carcinoma,oesophagus | ovary
+HRAS,106,p.S106P,2,S,P,0.2422,23.3080,-0.0000,False,0,carcinoma,NS
+HRAS,106,p.S106L,2,S,L,0.2422,23.3080,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+HRAS,164,p.R164Q,2,R,Q,0.2081,24.4804,-0.0000,False,0,carcinoma,cervix | large_intestine
+HRAS,109,p.V109M,2,V,M,0.0208,19.6088,-0.0000,False,0,carcinoma,stomach
+HRAS,118,p.C118Y,2,C,Y,0.0898,4.8563,-0.0000,False,0,carcinoma,breast | upper_aerodigestive_tract
+HRAS,131,p.Q131E,2,Q,E,0.2374,17.6410,0.9183,False,0,carcinoma,lung
+HRAS,72,p.M72I,2,M,I,0.0000,12.7348,-0.0000,False,0,carcinoma,thyroid | upper_aerodigestive_tract
+KRAS,73,p.R73M,2,R,M,0.2153,19.5240,-0.0000,False,0,carcinoma | primitive_neuroectodermal_tumour-medulloblastoma,central_nervous_system | skin
+KRAS,27,p.H27Y,2,H,Y,0.3386,9.5643,-0.0000,False,0,malignant_melanoma,skin
+KRAS,28,p.F28L,2,F,L,0.1281,3.7045,-0.0000,False,0,carcinoma,pancreas
+KRAS,48,p.G48A,2,G,A,0.2757,27.8939,-0.0000,False,0,carcinoma,lung
+KRAS,28,p.F28S,2,F,S,0.1281,3.7045,-0.0000,False,0,carcinoma,salivary_gland
+NRAS,131,p.H131N,2,H,N,0.2320,16.5497,0.9183,False,0,malignant_melanoma,skin
+KRAS,48,p.G48E,2,G,E,0.2757,27.8939,-0.0000,False,0,malignant_melanoma,skin
+KRAS,52,p.L52F,2,L,F,0.1742,20.5563,-0.0000,False,0,carcinoma | glioma,central_nervous_system | skin
+NRAS,112,p.V112M,2,V,M,0.0000,13.3264,-0.0000,False,0,carcinoma,urinary_tract
+HRAS,71,p.Y71H,1,Y,H,0.0000,9.2215,-0.0000,False,0,carcinoma,stomach
+HRAS,54,p.D54N,1,D,N,0.0222,14.8890,-0.0000,False,0,carcinoma,stomach
+HRAS,57,p.D57N,1,D,N,0.0000,4.0440,-0.0000,False,0,carcinoma,skin
+HRAS,86,p.N86S,1,N,S,0.0118,8.9211,-0.0000,False,0,carcinoma,NS
+HRAS,83,p.A83D,1,A,D,0.0000,7.3389,-0.0000,False,0,carcinoma,upper_aerodigestive_tract
+KRAS,163,p.I163S,1,I,S,0.0000,19.1718,-0.0000,False,0,carcinoma,lung
+KRAS,161,p.R161G,1,R,G,0.2090,20.3706,-0.0000,False,0,carcinoma,liver
+HRAS,75,p.G75E,1,G,E,0.0103,17.2929,-0.0000,False,0,carcinoma,skin
+KRAS,159,p.L159S,1,L,S,0.0000,14.7951,-0.0000,False,0,carcinoma,NS
+KRAS,156,p.F156L,1,F,L,0.0000,10.5984,-0.0000,False,0,malignant_melanoma,skin
+KRAS,155,p.A155D,1,A,D,0.0000,11.3807,-0.0000,False,0,carcinoma,large_intestine
+KRAS,136,p.S136N,1,S,N,0.4505,22.3393,-0.0000,False,0,other,large_intestine
+NRAS,95,p.L95F,1,L,F,0.4292,14.0594,1.5850,False,0,carcinoma,skin
+NRAS,98,p.E98D,1,E,D,0.2656,16.9290,-0.0000,False,0,carcinoma,lung
+HRAS,7,p.V7L,1,V,L,0.0000,11.2354,-0.0000,False,0,carcinoma,urinary_tract
+HRAS,4,p.Y4H,1,Y,H,0.0000,18.1817,-0.0000,False,0,carcinoma,skin
+HRAS,34,p.P34S,1,P,S,0.1139,3.4308,-0.0000,False,1,haemangioma,soft_tissue
+HRAS,9,p.V9M,1,V,M,0.0000,7.2323,-0.0000,False,0,carcinoma,large_intestine
+HRAS,18,p.A18V,1,A,V,0.0000,2.8089,-0.0000,False,1,carcinoma,large_intestine
+HRAS,20,p.T20I,1,T,I,0.0000,6.9367,-0.0000,False,0,in_situ_epithelial_neoplasm,skin
+HRAS,15,p.G15D,1,G,D,0.0000,2.9971,-0.0000,False,0,haemangioma,soft_tissue
+HRAS,14,p.V14G,1,V,G,0.0000,3.2269,-0.0000,False,1,carcinoma,prostate
+KRAS,154,p.D154N,1,D,N,0.2474,13.2710,-0.0000,False,0,carcinoma,NS
+NRAS,162,p.E162K,1,E,K,0.0192,21.0071,-0.0000,False,0,carcinoma,breast
+HRAS,53,p.L53M,1,L,M,0.0060,16.9349,-0.0000,False,0,carcinoma,lung
+HRAS,44,p.V44M,1,V,M,0.0208,19.6016,-0.0000,False,0,carcinoma,stomach
+HRAS,36,p.I36V,1,I,V,0.1287,5.6722,-0.0000,False,0,carcinoma,skin
+NRAS,100,p.I100T,1,I,T,0.0061,13.8258,-0.0000,False,0,carcinoma,kidney
+NRAS,77,p.G77C,1,G,C,0.0000,15.2955,-0.0000,False,0,carcinoma,ovary
+NRAS,108,p.D108G,1,D,G,0.0757,22.8479,-0.0000,False,0,carcinoma,large_intestine
+NRAS,72,p.M72I,1,M,I,0.0108,12.5644,-0.0000,False,0,carcinoma,cervix
+NRAS,74,p.T74S,1,T,S,0.3626,17.8238,-0.0000,False,0,carcinoma,kidney
+NRAS,87,p.S87C,1,S,C,0.2474,13.1935,0.9183,False,0,carcinoma,cervix
+NRAS,84,p.I84T,1,I,T,0.0000,7.9592,-0.0000,False,0,carcinoma,oesophagus
+NRAS,83,p.A83G,1,A,G,0.0000,7.3155,-0.0000,False,0,carcinoma,liver
+HRAS,99,p.Q99E,1,Q,E,0.0688,14.0627,-0.0000,False,0,carcinoma,breast
+HRAS,90,p.F90C,1,F,C,0.1107,11.6000,-0.0000,False,0,carcinoma,breast
+HRAS,89,p.S89T,1,S,T,0.0000,8.7147,-0.0000,False,0,carcinoma,NS
+HRAS,88,p.K88E,1,K,E,0.2396,12.1113,-0.0000,False,0,carcinoma,skin
+KRAS,148,p.T148S,1,T,S,0.3355,5.8538,-0.0000,False,0,carcinoma,large_intestine
+HRAS,26,p.N26D,1,N,D,0.1905,12.7507,-0.0000,False,0,carcinoma,skin
+HRAS,32,p.Y32C,1,Y,C,0.0913,3.7729,-0.0000,False,0,carcinoma,skin
+HRAS,25,p.Q25H,1,Q,H,0.2699,11.7550,-0.0000,False,0,carcinoma,endometrium
+NRAS,92,p.D92N,1,D,N,0.0514,10.3899,-0.0000,False,0,carcinoma,urinary_tract
+HRAS,147,p.K147N,1,K,N,0.2456,3.5748,-0.0000,False,0,carcinoma,lung
+HRAS,137,p.Y137D,1,Y,D,0.0276,17.3556,-0.0000,False,0,carcinoma,skin
+HRAS,144,p.T144I,1,T,I,0.0000,4.6162,-0.0000,False,0,carcinoma,skin
+KRAS,25,p.Q25H,1,Q,H,0.3131,11.9245,-0.0000,False,0,carcinoma,NS
+HRAS,135,p.R135Q,1,R,Q,0.5435,21.6075,0.9183,False,0,carcinoma,large_intestine
+HRAS,162,p.E162K,1,E,K,0.0192,20.6909,-0.0000,False,0,carcinoma,urinary_tract
+NRAS,3,p.E3A,1,E,A,0.2101,21.7499,-0.0000,False,0,carcinoma,kidney
+HRAS,120,p.L120V,1,L,V,0.0894,3.6202,-0.0000,False,0,carcinoma,kidney
+HRAS,122,p.A122T,1,A,T,0.3974,9.4643,1.5850,False,0,carcinoma,large_intestine
+HRAS,124,p.T124I,1,T,I,0.2520,13.1484,-0.0000,False,0,carcinoma,skin
+HRAS,132,p.D132V,1,D,V,0.2076,20.3376,0.9183,False,0,carcinoma,NS
+NRAS,15,p.G15V,1,G,V,0.0000,3.1167,-0.0000,False,0,carcinoma,large_intestine
+NRAS,16,p.K16E,1,K,E,0.0000,2.6991,-0.0000,False,0,carcinoma,pancreas
+KRAS,123,p.R123I,1,R,I,0.0561,10.9759,-0.0000,False,0,carcinoma,oesophagus
+KRAS,122,p.S122F,1,S,F,0.5003,10.9450,1.5850,False,0,malignant_melanoma,skin
+KRAS,125,p.V125I,1,V,I,0.0000,13.3186,-0.0000,False,0,carcinoma,large_intestine
+KRAS,82,p.F82V,1,F,V,0.0035,8.1105,-0.0000,False,0,glioma,central_nervous_system
+KRAS,131,p.Q131E,1,Q,E,0.1304,17.3949,0.9183,False,0,carcinoma,oesophagus
+KRAS,127,p.T127I,1,T,I,0.1417,13.8873,0.9183,False,0,other,peritoneum
+KRAS,85,p.N85H,1,N,H,0.1009,7.6742,-0.0000,False,0,carcinoma,large_intestine
+KRAS,79,p.L79I,1,L,I,0.0042,9.4998,-0.0000,False,0,carcinoma,small_intestine
+NRAS,10,p.G10V,1,G,V,0.0000,4.8381,-0.0000,False,1,lymphoid_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,29,p.V29L,1,V,L,0.1889,4.6790,-0.0000,False,0,carcinoma,lung
+NRAS,20,p.T20K,1,T,K,0.0000,6.9695,-0.0000,False,0,other,liver
+NRAS,18,p.A18V,1,A,V,0.0000,2.8107,-0.0000,False,1,carcinoma,thyroid
+KRAS,92,p.D92Y,1,D,Y,0.0666,10.4672,-0.0000,False,0,carcinoma,breast
+KRAS,91,p.E91G,1,E,G,0.2175,14.0468,0.9183,False,0,carcinoma,skin
+NRAS,4,p.Y4D,1,Y,D,0.0092,17.7764,-0.0000,False,0,carcinoma,oesophagus
+NRAS,9,p.V9I,1,V,I,0.0139,7.1231,-0.0000,False,0,carcinoma,large_intestine
+HRAS,102,p.R102L,1,R,L,0.4070,17.9595,-0.0000,False,0,carcinoma,lung
+HRAS,107,p.D107G,1,D,G,0.4573,24.3743,0.9183,False,0,carcinoma,NS
+HRAS,130,p.A130T,1,A,T,0.0000,14.9949,-0.0000,False,0,carcinoma,cervix
+HRAS,161,p.R161H,1,R,H,0.1304,19.4806,-0.0000,False,0,carcinoma,pancreas
+HRAS,152,p.V152L,1,V,L,0.0062,7.0876,-0.0000,False,0,malignant_melanoma,skin
+HRAS,148,p.T148A,1,T,A,0.3858,5.6975,-0.0000,False,0,carcinoma,skin
+KRAS,144,p.T144P,1,T,P,0.0000,4.5634,-0.0000,False,0,carcinoma,large_intestine
+KRAS,145,p.S145L,1,S,L,0.0000,3.3839,-0.0000,False,0,carcinoma,large_intestine
+KRAS,118,p.C118S,1,C,S,0.0948,4.7238,-0.0000,False,0,carcinoma,lung
+KRAS,67,p.M67I,1,M,I,0.2395,15.8800,-0.0000,False,0,carcinoma,oesophagus
+KRAS,66,p.A66S,1,A,S,0.3175,19.2945,-0.0000,False,0,carcinoma,breast
+NRAS,14,p.V14I,1,V,I,0.0000,3.2849,-0.0000,False,1,haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue
+NRAS,53,p.L53F,1,L,F,0.0053,16.4198,-0.0000,False,0,carcinoma,stomach
+NRAS,52,p.L52W,1,L,W,0.0781,19.8671,-0.0000,False,0,malignant_melanoma,skin
+KRAS,71,p.Y71C,1,Y,C,0.0000,11.4427,-0.0000,False,0,carcinoma,large_intestine
+KRAS,72,p.M72V,1,M,V,0.0000,14.0932,-0.0000,False,0,carcinoma,large_intestine
+KRAS,70,p.Q70P,1,Q,P,0.2975,18.3078,-0.0000,False,0,carcinoma,large_intestine
+NRAS,40,p.Y40D,1,Y,D,0.0953,7.7008,-0.0000,False,0,carcinoma,lung
+NRAS,58,p.T58I,1,T,I,0.0000,4.1586,-0.0000,False,1,malignant_melanoma,NS
+KRAS,77,p.G77S,1,G,S,0.0000,15.2026,-0.0000,False,0,carcinoma,skin
+KRAS,76,p.E76G,1,E,G,0.0384,18.9251,-0.0000,False,0,carcinoma,large_intestine
+KRAS,74,p.T74A,1,T,A,0.2186,18.4712,-0.0000,False,0,carcinoma,lung
+NRAS,41,p.R41I,1,R,I,0.3513,14.8076,-0.0000,False,0,carcinoma,endometrium
+NRAS,36,p.I36M,1,I,M,0.3249,5.7372,-0.0000,False,0,carcinoma,lung
+NRAS,45,p.V45G,1,V,G,0.2568,22.4794,-0.0000,False,0,carcinoma,stomach
+NRAS,47,p.D47A,1,D,A,0.4278,23.5733,-0.0000,False,0,glioma,central_nervous_system
+KRAS,107,p.E107K,1,E,K,0.2234,24.5195,0.9183,False,0,carcinoma,large_intestine
+KRAS,95,p.H95L,1,H,L,0.2596,13.9166,1.5850,False,0,haematopoietic_neoplasm,haematopoietic_and_lymphoid_tissue
+KRAS,93,p.I93F,1,I,F,0.0000,11.0004,-0.0000,False,0,carcinoma,endometrium
+NRAS,43,p.Q43R,1,Q,R,0.4771,20.2592,-0.0000,False,0,carcinoma,large_intestine
+NRAS,71,p.Y71C,1,Y,C,0.0912,13.7203,-0.0000,False,0,carcinoma,large_intestine
+KRAS,30,p.D30A,1,D,A,0.4752,2.8963,-0.0000,False,0,carcinoma,large_intestine
+KRAS,39,p.S39Y,1,S,Y,0.0207,10.5079,-0.0000,False,0,carcinoma,cervix
+KRAS,44,p.V44E,1,V,E,0.1539,19.8510,-0.0000,False,0,carcinoma,large_intestine
+NRAS,165,p.Q165H,1,Q,H,0.2739,25.2649,-0.0000,False,0,carcinoma,kidney
+NRAS,55,p.I55V,1,I,V,0.0000,10.5201,-0.0000,False,0,malignant_melanoma,skin
+KRAS,29,p.V29M,1,V,M,0.1367,4.1142,-0.0000,False,0,germ_cell_tumour,testis
+KRAS,49,p.E49K,1,E,K,0.4091,26.6092,-0.0000,False,0,carcinoma,large_intestine
+NRAS,117,p.K117R,1,K,R,0.0000,3.1460,-0.0000,True,2,malignant_melanoma,skin
+NRAS,129,p.Q129E,1,Q,E,0.3123,18.0943,-0.0000,False,0,adnexal_tumour,skin
+NRAS,130,p.A130D,1,A,D,0.0000,14.9973,-0.0000,False,0,carcinoma,endometrium
+NRAS,143,p.E143K,1,E,K,0.1061,8.6096,-0.0000,False,0,germ_cell_tumour,testis
+NRAS,138,p.G138R,1,G,R,0.2296,22.6898,-0.0000,False,0,carcinoma,skin
+NRAS,141,p.F141L,1,F,L,0.1101,12.3417,0.9183,False,0,carcinoma,lung
+KRAS,3,p.E3K,1,E,K,0.3236,20.1560,-0.0000,False,0,carcinoma,lung
+KRAS,2,p.T2I,1,T,I,0.1224,24.2584,-0.0000,False,0,carcinoma,skin
