@@ -16,14 +16,16 @@ family:
         start: 1
         end: 166
       pdbs:
-        primary:
+        GTP_structure:
+          id: 5UK9
+          chain: B
+          ligand: GCP
+          resolution_angstrom: 1.89
+        GDP_structure:
           id: 4OBE
+          chain: A
           ligand: GDP
           resolution_angstrom: 1.24
-        secondary:
-          id: 5UK9
-          ligand: GppNHp
-          resolution_angstrom: 1.89
     HRAS:
       uniprot_id: P01112
       length: 189
@@ -31,14 +33,16 @@ family:
         start: 1
         end: 166
       pdbs:
-        primary:
+        GTP_structure:
           id: 3K8Y
-          ligand: GppNHp
+          chain: A
+          ligand: GNP
           resolution_angstrom: 1.30
-        secondary:
-          id: 2RGE
+        GDP_structure:
+          id: 4Q21
+          chain: A
           ligand: GDP
-          resolution_angstrom: 1.40
+          resolution_angstrom: 2.00
     NRAS:
       uniprot_id: P01111
       length: 189
@@ -46,12 +50,14 @@ family:
         start: 1
         end: 166
       pdbs:
-        primary:
+        GTP_structure:
           id: 5UHV
-          ligand: GppNHp
+          chain: A
+          ligand: GNP
           resolution_angstrom: 1.67
-        secondary:
+        GDP_structure:
           id: 3CON
+          chain: A
           ligand: GDP
           resolution_angstrom: 1.65
 
@@ -65,13 +71,13 @@ active_site:
       start: 30
       end: 38
     switch_ii:
-      start: 60
+      start: 59
       end: 76
     nkxd:
       start: 116
       end: 119
     sak:
-      start: 145
+      start: 143
       end: 147
   cofactors:
     - Mg2+

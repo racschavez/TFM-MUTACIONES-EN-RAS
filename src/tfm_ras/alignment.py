@@ -789,7 +789,7 @@ def visualize_msa(msa, position_map, output_path):
     # Parche de color por grupo fisicoquímico con borde fino para legibilidad.
     handles = [
         plt.matplotlib.patches.Patch(
-            color=AA_GROUP_COLORS[name],
+            facecolor=AA_GROUP_COLORS[name],
             label=name,
             linewidth=0.3,
             edgecolor="#888888",

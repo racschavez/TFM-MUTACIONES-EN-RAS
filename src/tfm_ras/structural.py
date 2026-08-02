@@ -195,7 +195,7 @@ DOMAIN_G_END = 166
 #   "n_members_mutated"        : número de parálogos (0–3) con ≥10 muestras
 #                                tumorales mutadas en esa posición
 MASTER_COLUMNS = [
-    "gene", "uniprot_position", "msa_position", "aa_wt",
+    "gene", "state", "uniprot_position", "msa_position", "aa_wt",
     "total_samples", "top_mutation",
     "sasa_abs", "sasa_rel",
     "dist_active_site_angstrom",
@@ -433,7 +433,7 @@ def parse_structure(pdb_path):
     # la estructura en Biopython.  '.upper()' asegura que el ID quede en
     # mayúsculas aunque el nombre de fichero esté en minúsculas.
     structure = parser.get_structure(Path(pdb_path).stem.upper(), pdb_path)
-
+    
     # 'structure.get_models()' devuelve un generador que produce objetos Model
     # en orden.  'next(...)' consume el primer elemento del generador, que
     # corresponde al modelo 0 (el único en estructuras de rayos X y el de
@@ -441,7 +441,7 @@ def parse_structure(pdb_path):
     return next(structure.get_models())  # primer modelo de la jerarquía SMCRA
 
 
-def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"), cofactor="MG", chain_id="A", max_mg_distance=3.5):
+def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"), cofactor="MG", max_mg_distance=3.5):
     """Extrae los átomos del sitio activo de la proteína RAS de la estructura.
 
     El sitio activo de las proteínas RAS es el bolsillo de unión al nucleótido
@@ -503,8 +503,6 @@ def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"
     # Extraemos los átomos del nucleótido
     nucleotide_atoms = []
     for residue in structure.get_residues():
-        if residue.get_parent().id != chain_id:
-            continue
         if residue.resname.strip().upper() in ligand_resnames:
             nucleotide_atoms.extend(list(residue.get_atoms()))
 
@@ -516,8 +514,7 @@ def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"
     # Añadimos solo el MG que esté cerca del nucleótido
     mg_atoms = []
     for residue in structure.get_residues():
-        if residue.get_parent().id != chain_id:
-            continue
+
         if residue.resname.strip().upper() == cofactor:
             for atom in residue.get_atoms():
                 # Distancia mínima de este átomo MG a cualquier átomo del nucleótido
@@ -533,86 +530,41 @@ def get_active_site_atoms(structure, ligand_resnames=("GDP", "GTP", "GNP", "GCP"
     return atoms
 
 
-def compute_sasa(structure, chain_id="A", method="dssp", relative=True):
-    """Calcula el SASA (Superficie Accesible al Solvente) para cada residuo.
+def compute_sasa(structure, chain_id="A", relative=True):
+    """Calcula la Superficie Accesible al Solvente (SASA) por residuo.
 
-    El SASA es el área de la superficie de una proteína que puede contactar
-    con el disolvente (agua).  Se estima haciendo "rodar" una sonda esférica
-    (radio ≈ 1,4 Å, equivalente al radio de una molécula de agua) por la
-    superficie de Van der Waals de la proteína.
-
-    Esta función implementa una estrategia de **fallback** (degradación
-    elegante) entre dos métodos:
-
-    1. **DSSP** (Define Secondary Structure of Proteins, Kabsch & Sander 1983):
-       invoca el programa externo 'mkdssp' (o 'dssp') instalado en el sistema.
-       Es el método estándar en bioinformática estructural: calcula simultánea-
-       mente la estructura secundaria (hélices, láminas) y el SASA de cada
-       residuo.  Es rápido (escrito en C++) pero requiere el binario instalado.
-
-    2. **Shrake-Rupley** (Shrake & Rupley 1973): implementado en Python puro
-       dentro de Biopython (Bio.PDB.ShrakeRupley).  No requiere programas
-       externos pero es más lento porque triangula la superficie con una malla
-       de puntos.  Se usa como alternativa automática si DSSP no está
-       disponible o falla.
+    Utiliza el algoritmo Shrake-Rupley implementado en Biopython.
 
     Parameters
     ----------
     structure : Bio.PDB.Model.Model
-        Modelo estructural (devuelto por 'parse_structure').
-    chain_id : str, optional
-        Identificador de la cadena proteica a analizar (por defecto "A").
-        En las estructuras de RAS la cadena de interés suele ser la "A".
-    method : str, optional
-        Método preferido: "dssp" (por defecto) intenta usar DSSP primero y
-        cae al Shrake-Rupley si no está disponible o falla.  Cualquier otro
-        valor fuerza el uso directo de Shrake-Rupley.
-    relative : bool, optional
-        Si True (por defecto), incluye el SASA relativo (sasa_abs / SASA_max)
-        normalizado con la escala Tien 2013.
+        Modelo estructural de Biopython.
+    chain_id : str
+        Identificador de la cadena a analizar.
+    relative : bool
+        Si True, calcula SASA relativa normalizada con la escala
+        de Tien et al. 2013.
 
     Returns
     -------
     pandas.DataFrame
-        DataFrame con columnas: "position", "residue", "sasa_abs", "sasa_rel".
-        Una fila por residuo estándar de la cadena indicada.
-
-    Examples
-    --------
-    >>> model = parse_structure("data/raw/pdb/4OBE.pdb")
-    >>> sasa_df = compute_sasa(model, chain_id="A")
-    >>> print(sasa_df.head())
-       position residue   sasa_abs  sasa_rel
-    0         1       M  180.30...  0.803...
+        Columnas:
+        - position
+        - residue
+        - sasa_abs
+        - sasa_rel
     """
 
-    # Normalizamos el método a minúsculas para comparación insensible a caso.
-    method = method.lower()  # "DSSP" -> "dssp"
+    result = _compute_sasa_shrake_rupley(
+        structure,
+        chain_id=chain_id,
+        relative=relative,
+    )
 
-    # --- Intento con DSSP (si se solicitó y el binario está disponible) -------
-    if method == "dssp" and (shutil.which("mkdssp") or shutil.which("dssp")):
-        # 'shutil.which("mkdssp")' busca el ejecutable 'mkdssp' en el PATH del
-        # sistema y devuelve su ruta completa si existe, o None si no.
-        # El nombre del binario varía según la versión instalada: versiones
-        # recientes usan 'mkdssp'; versiones antiguas pueden llamarse 'dssp'.
-        # Por eso se comprueba ambos con 'or'.
-        try:
-            # Intentamos calcular el SASA con DSSP.  Si falla por cualquier
-            # razón (ej. la estructura tiene residuos no estándar que confunden
-            # a DSSP), la excepción es capturada y se usa el método alternativo.
-            sasa_result = _compute_sasa_dssp(structure, chain_id=chain_id, relative=relative)
-            
-            return sasa_result, "DDSP"
-
-        except Exception:
-            pass
-
-    result = _compute_sasa_shrake_rupley(structure, chain_id=chain_id, relative=relative)
- 
     return result, "Shrake-Rupley"
 
 
-def distance_to_active_site(structure, active_site_atoms, chain_id="A"):
+def distance_to_active_site(structure, active_site_atoms, chain_id):
     """Calcula la distancia mínima de cada residuo al sitio activo de RAS.
 
     Para cada residuo estándar de la cadena indicada, se calcula la distancia
@@ -947,99 +899,113 @@ def merge_features(mutations_df, sasa_df, distance_df, conservation_df, position
 
     # Iteramos sobre los tres parálogos RAS y sobre cada posición del dominio G.
     for gene in GENES:  # "KRAS", "HRAS", "NRAS"
+        for state in ["GTP", "GDP"]:
 
-        # Nombre del gen en minúsculas, usado como prefijo de columna en
-        # 'position_map' (ej. "kras_position", "kras_aa").
-        gene_lower = gene.lower()  # "KRAS" -> "kras", "HRAS" -> "hras", etc.
+            # Nombre del gen en minúsculas, usado como prefijo de columna en
+            # 'position_map' (ej. "kras_position", "kras_aa").
+            gene_lower = gene.lower()  # "KRAS" -> "kras", "HRAS" -> "hras", etc.
 
-        # Iteramos sobre todas las posiciones del dominio G (1 a 166 inclusive).
-        for uniprot_position in range(1, DOMAIN_G_END + 1):  # 1, 2, ..., 166
+            # Iteramos sobre todas las posiciones del dominio G (1 a 166 inclusive).
+            for uniprot_position in range(1, DOMAIN_G_END + 1):  # 1, 2, ..., 166
 
-            # --- Buscar la fila de mapeo de posición -------------------------
+                # --- Buscar la fila de mapeo de posición -------------------------
 
-            # Filtramos el DataFrame de mapeo para encontrar la fila(s) donde
-            # la posición UniProt de este gen coincide con 'uniprot_position'.
-            # '.eq(x)' es equivalente a '== x' pero funciona con NaN de forma
-            # predecible (NaN.eq(NaN) es False, == devuelve NaN).
-            map_rows = position_map.loc[
-                position_map[f"{gene_lower}_position"].eq(uniprot_position)
-            ]  # DataFrame filtrado; puede tener 0, 1 o más filas
+                # Filtramos el DataFrame de mapeo para encontrar la fila(s) donde
+                # la posición UniProt de este gen coincide con 'uniprot_position'.
+                # '.eq(x)' es equivalente a '== x' pero funciona con NaN de forma
+                # predecible (NaN.eq(NaN) es False, == devuelve NaN).
+                map_rows = position_map.loc[
+                    position_map[f"{gene_lower}_position"].eq(uniprot_position)
+                ]  # DataFrame filtrado; puede tener 0, 1 o más filas
 
-            # Si no hay fila para esta posición y gen (puede faltar en el mapa
-            # si la posición está en una región sin alinear), la omitimos.
-            if map_rows.empty:  # sin filas -> posición no mapeada
-                continue  # saltamos al siguiente valor de uniprot_position
+                # Si no hay fila para esta posición y gen (puede faltar en el mapa
+                # si la posición está en una región sin alinear), la omitimos.
+                if map_rows.empty:  # sin filas -> posición no mapeada
+                    continue  # saltamos al siguiente valor de uniprot_position
 
-            # Tomamos la primera fila del resultado como Serie de pandas.
-            # '.iloc[0]' accede por posición entera (0 = primera fila) sin
-            # importar el índice del DataFrame original.
-            map_row = map_rows.iloc[0]  # Serie con los datos de mapeo de esta posición
+                # Tomamos la primera fila del resultado como Serie de pandas.
+                # '.iloc[0]' accede por posición entera (0 = primera fila) sin
+                # importar el índice del DataFrame original.
+                map_row = map_rows.iloc[0]  # Serie con los datos de mapeo de esta posición
 
-            # Extraemos la posición MSA y el aminoácido wild-type de este gen.
-            msa_position = int(map_row["msa_position"])        # posición en el MSA (int)
-            aa_wt = map_row[f"{gene_lower}_aa"]                # aminoácido wild-type en código 1 letra
+                # Extraemos la posición MSA y el aminoácido wild-type de este gen.
+                msa_position = int(map_row["msa_position"])        # posición en el MSA (int)
+                aa_wt = map_row[f"{gene_lower}_aa"]                # aminoácido wild-type en código 1 letra
 
-            # --- Buscar información de mutaciones ----------------------------
+                # --- Buscar información de mutaciones ----------------------------
 
-            # El lookup devuelve un dict vacío {} si no hay mutaciones en esta
-            # posición y gen, lo que hace que .get() devuelva los valores por
-            # defecto en las líneas siguientes.
-            mutation_info = mutation_lookup.get((gene, uniprot_position), {})
-            # mutation_info contiene {"total_samples": int, "top_mutation": str} o {}
+                # El lookup devuelve un dict vacío {} si no hay mutaciones en esta
+                # posición y gen, lo que hace que .get() devuelva los valores por
+                # defecto en las líneas siguientes.
+                mutation_info = mutation_lookup.get((gene, uniprot_position), {})
+                # mutation_info contiene {"total_samples": int, "top_mutation": str} o {}
 
-            # --- Buscar SASA y distancia al sitio activo ---------------------
+                # --- Buscar SASA y distancia al sitio activo ---------------------
 
-            # Función auxiliar que filtra el DataFrame y devuelve un dict con
-            # los valores de la primera fila coincidente, o {} si no hay.
-            sasa_info = _single_row_lookup(sasa_df, gene=gene, position=uniprot_position)
-            distance_info = _single_row_lookup(distance_df, gene=gene, position=uniprot_position)
+                # Función auxiliar que filtra el DataFrame y devuelve un dict con
+                # los valores de la primera fila coincidente, o {} si no hay.
+                sasa_info = _single_row_lookup(
+                    sasa_df,
+                    gene=gene,
+                    state=state,
+                    position=uniprot_position,
+                )
 
-            # --- Buscar entropía de conservación del MSA ---------------------
+                distance_info = _single_row_lookup(
+                    distance_df,
+                    gene=gene,
+                    state=state,
+                    position=uniprot_position,
+                )
+                
+                # --- Buscar entropía de conservación del MSA ---------------------
 
-            # Filtramos el DataFrame de conservación por posición MSA.
-            conservation_rows = conservation_df.loc[
-                conservation_df["msa_position"].eq(msa_position)
-            ]  # DataFrame filtrado; debería tener 0 o 1 fila
+                # Filtramos el DataFrame de conservación por posición MSA.
+                conservation_rows = conservation_df.loc[
+                    conservation_df["msa_position"].eq(msa_position)
+                ]  # DataFrame filtrado; debería tener 0 o 1 fila
 
-            # Extraemos la entropía si existe; de lo contrario usamos NaN.
-            entropy = (
-                float(conservation_rows.iloc[0]["entropy_bits"])  # valor de la primera fila
-                if not conservation_rows.empty                     # solo si hay filas
-                else np.nan                                        # NaN si no hay datos
-            )
+                # Extraemos la entropía si existe; de lo contrario usamos NaN.
+                entropy = (
+                    float(conservation_rows.iloc[0]["entropy_bits"])  # valor de la primera fila
+                    if not conservation_rows.empty                     # solo si hay filas
+                    else np.nan                                        # NaN si no hay datos
+                )
 
-            # --- Buscar criterio de recurrencia pan-RAS ----------------------
+                # --- Buscar criterio de recurrencia pan-RAS ----------------------
 
-            # El criterio de recurrencia es a nivel de posición (no de gen):
-            # buscamos por posición UniProt sin distinguir gen.
-            rec_info = recurrent_lookup.get(uniprot_position, {})
-            # rec_info contiene {"recurrent": bool, "n_members_mutated": int} o {}
+                # El criterio de recurrencia es a nivel de posición (no de gen):
+                # buscamos por posición UniProt sin distinguir gen.
+                rec_info = recurrent_lookup.get(uniprot_position, {})
+                # rec_info contiene {"recurrent": bool, "n_members_mutated": int} o {}
 
-            # --- Construir la fila de la tabla maestra -----------------------
+                # --- Construir la fila de la tabla maestra -----------------------
 
-            # Añadimos un dict con todos los features de esta (gen, posición).
-            rows.append({
-                "gene": gene,                                             # identificador del gen
-                "uniprot_position": uniprot_position,                    # posición en UniProt (1–166)
-                "msa_position": msa_position,                            # posición en el MSA
-                "aa_wt": aa_wt,                                          # aminoácido wild-type
-                "total_samples": int(mutation_info.get("total_samples", 0)),  # total muestras mutadas (0 si ninguna)
-                "top_mutation": mutation_info.get("top_mutation", ""),   # mutación más frecuente (cadena vacía si ninguna)
-                "sasa_abs": sasa_info.get("sasa_abs", np.nan),           # SASA absoluto en Å² (NaN si no hay PDB)
-                "sasa_rel": sasa_info.get("sasa_rel", np.nan),           # SASA relativo 0-1 (NaN si no hay PDB)
-                "dist_active_site_angstrom": distance_info.get("min_distance_angstrom", np.nan),  # distancia al sitio activo en Å
-                "shannon_entropy": entropy,                              # entropía de Shannon en bits
-                "recurrent": bool(rec_info.get("recurrent", False)),     # True si mutación pan-RAS recurrente
-                "n_members_mutated": int(rec_info.get("n_members_mutated", 0)),  # número de parálogos con mutación
-            })
-
+                # Añadimos un dict con todos los features de esta (gen, posición).
+                rows.append({                                         # estado GTP o GDP
+                    "gene": gene, 
+                    "state": state,                                            # identificador del gen
+                    "uniprot_position": uniprot_position,                    # posición en UniProt (1–166)
+                    "msa_position": msa_position,                            # posición en el MSA
+                    "aa_wt": aa_wt,                                          # aminoácido wild-type
+                    "total_samples": int(mutation_info.get("total_samples", 0)),  # total muestras mutadas (0 si ninguna)
+                    "top_mutation": mutation_info.get("top_mutation", ""),   # mutación más frecuente (cadena vacía si ninguna)
+                    "sasa_abs": sasa_info.get("sasa_abs", np.nan),           # SASA absoluto en Å² (NaN si no hay PDB)
+                    "sasa_rel": sasa_info.get("sasa_rel", np.nan),           # SASA relativo 0-1 (NaN si no hay PDB)
+                    "dist_active_site_angstrom": distance_info.get("min_distance_angstrom", np.nan),  # distancia al sitio activo en Å
+                    "shannon_entropy": entropy,                              # entropía de Shannon en bits
+                    "recurrent": bool(rec_info.get("recurrent", False)),     # True si mutación pan-RAS recurrente
+                    "n_members_mutated": int(rec_info.get("n_members_mutated", 0)),  # número de parálogos con mutación
+                })
+    
+    
     # Construimos el DataFrame final con las columnas en el orden canónico
     # definido por MASTER_COLUMNS.  Pasar 'columns=MASTER_COLUMNS' garantiza
     # el orden de columnas aunque el dict de cada fila las tenga en otro orden.
     return pd.DataFrame(rows, columns=MASTER_COLUMNS)  # tabla maestra (N_filas, 12)
 
 
-def plot_features_overview(master_df, output_path):
+def plot_features_overview(master_df, output_path, state=None):
     """Genera y guarda un panel de cuatro subgráficos de la tabla maestra.
 
     Produce una figura de alta resolución (300 dpi) con cuatro paneles
@@ -1061,6 +1027,9 @@ def plot_features_overview(master_df, output_path):
     output_path : str or Path
         Ruta donde se guardará la figura (ej. "results/figures/overview.png").
         El directorio padre se crea automáticamente si no existe.
+    state : str or None
+        Si se especifica ("GTP" o "GDP"), filtra la tabla maestra a ese
+        estado antes de graficar. Si es None, se usan ambos estados.
 
     Returns
     -------
@@ -1080,6 +1049,9 @@ def plot_features_overview(master_df, output_path):
     # Creamos el directorio padre si no existe (y todos los intermedios).
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
+    if state is not None:
+        master_df = master_df.loc[master_df["state"] == state].copy()
+
     # Creamos la figura con 4 subplots en columna.  'sharex=True' hace que
     # todos los ejes compartan el mismo eje X, de forma que al hacer zoom en
     # uno se ajustan todos.  'figsize=(13, 9)' define el tamaño en pulgadas.
@@ -1090,20 +1062,50 @@ def plot_features_overview(master_df, output_path):
     colors = {"KRAS": "#4C78A8", "HRAS": "#F58518", "NRAS": "#54A24B"}
 
     # --- Trazado de datos por gen --------------------------------------------
-    for gene in GENES:  # "KRAS", "HRAS", "NRAS"
+    linestyles = {
+        "GDP": "--",
+        "GTP": "-"
+    }
 
-        # Filtramos las filas del DataFrame maestro correspondientes a este gen.
-        # '.eq(gene)' es equivalente a '== gene' pero con comportamiento
-        # definido cuando hay NaN.
-        subset = master_df.loc[master_df["gene"].eq(gene)]  # filas del gen actual
+    for gene in GENES:
 
-        # Panel 0: SASA relativo (eje Y: 0–1, exposición superficial).
-        axes[0].plot(subset["msa_position"], subset["sasa_rel"],
-                     label=gene, color=colors[gene])
+        # --- Panel 3: muestras tumorales (independiente del estado GTP/GDP) --
+        # 'total_samples' no varía entre GTP y GDP para un mismo gen y posición
+        # (viene de COSMIC, no de la estructura), así que se calcula UNA sola
+        # vez por gen, fuera del bucle de estados, para evitar:
+        #   (a) dibujarlo dos veces superpuesto cuando state=None, y
+        #   (b) que salga vacío cuando se filtra a un solo estado y ese
+        #       estado no coincide con la última iteración del bucle interno.
+        gene_samples = (
+            master_df[master_df["gene"] == gene]
+            .drop_duplicates("msa_position")
+            .sort_values("msa_position")
+        )
 
-        # Panel 1: distancia al sitio activo en Å.
-        axes[1].plot(subset["msa_position"], subset["dist_active_site_angstrom"],
-                     label=gene, color=colors[gene])
+        for current_state in ["GDP", "GTP"]:
+
+            subset = (
+                master_df[
+                    (master_df["gene"] == gene) &
+                    (master_df["state"] == current_state)
+                ]
+                .sort_values("msa_position")
+            )
+
+            axes[0].plot(
+                subset["msa_position"],
+                subset["sasa_rel"],
+                color=colors[gene],
+                linestyle=linestyles[current_state],
+                label=f"{gene} {current_state}",
+            )
+
+            axes[1].plot(
+                subset["msa_position"],
+                subset["dist_active_site_angstrom"],
+                color=colors[gene],
+                linestyle=linestyles[current_state],  # FIX: antes era linestyles[state]
+            )
 
         # Panel 3: log₁₀(muestras + 1).  Se usa log porque los recuentos de
         # mutaciones tienen distribuciones muy sesgadas (G12D en KRAS tiene
@@ -1111,8 +1113,15 @@ def plot_features_overview(master_df, output_path):
         # del log para evitar log(0) cuando no hay muestras ('total_samples=0').
         # 'alpha=0.35' hace las barras semitransparentes para que se vean las
         # de los tres genes solapadas.
-        axes[3].bar(subset["msa_position"], np.log10(subset["total_samples"] + 1),
-                    alpha=0.35, label=gene, color=colors[gene])
+        # FIX: se dibuja una sola vez por gen (fuera del bucle de estados),
+        # usando 'gene_samples' en vez de 'subset'.
+        axes[3].bar(
+            gene_samples["msa_position"],
+            np.log10(gene_samples["total_samples"] + 1),
+            alpha=0.35,
+            label=gene,
+            color=colors[gene],
+        )
 
     # --- Panel 2: entropía de Shannon (independiente del gen) ----------------
 
@@ -1141,10 +1150,10 @@ def plot_features_overview(master_df, output_path):
 
         # Sombreado gris claro (alpha=0.05) para regiones funcionalmente
         # importantes del dominio G de RAS:
-        # P-loop (motivo G1, residuos 10-17)  
-        # Switch I (residuos 30-38)           
+        # P-loop (motivo G1, residuos 10-17)
+        # Switch I (residuos 30-38)
         # Switch II (residuos 60-76)
-        # NKxD (residuos 116-119)          
+        # NKxD (residuos 116-119)
         # SAK (residuos 145-147)
 
         FUNCTIONAL_REGIONS = {
@@ -1154,7 +1163,7 @@ def plot_features_overview(master_df, output_path):
             "NKxD": (116, 119),
             "SAK": (145, 147),
             }
-        
+
         for region, (start, end) in FUNCTIONAL_REGIONS.items():
 
             # Región sombreada
@@ -1204,7 +1213,12 @@ def plot_features_overview(master_df, output_path):
 
     # 'tight_layout()' ajusta automáticamente los márgenes para evitar que las
     # etiquetas de los ejes se superpongan entre paneles.
-    fig.tight_layout()
+    if state is None:
+        fig.suptitle("RAS - Todos los estados", fontsize=15)
+    else:
+        fig.suptitle(f"RAS - Estado {state}", fontsize=15)
+
+    fig.tight_layout(rect=[0, 0, 1, 0.97])
 
     # Guardamos la figura en el fichero de salida a 300 dpi (resolución
     # adecuada para publicación científica).  Matplotlib infiere el formato
@@ -1223,75 +1237,6 @@ def plot_features_overview(master_df, output_path):
 # ===========================================================================
 # Funciones privadas (auxiliares, no forman parte de la API pública)
 # ===========================================================================
-
-def _compute_sasa_dssp(structure, chain_id, relative):
-    """Calcula el SASA usando el programa externo DSSP (Kabsch & Sander 1983).
-
-    DSSP (Define Secondary Structure of Proteins) es el algoritmo de referencia
-    para asignar estructura secundaria y calcular el SASA en proteínas.  Invoca
-    el binario 'mkdssp' o 'dssp' instalado en el sistema.
-
-    Parameters
-    ----------
-    structure : Bio.PDB.Model.Model
-        Modelo estructural de Biopython.
-    chain_id : str
-        Identificador de la cadena a extraer (ej. "A").
-    relative : bool
-        Si True, incluye la columna 'sasa_rel' normalizada con Tien 2013.
-
-    Returns
-    -------
-    pandas.DataFrame
-        DataFrame con columnas: "position", "residue", "sasa_abs", "sasa_rel".
-
-    Notes
-    -----
-    Esta función es privada (prefijo '_') y solo se llama desde 'compute_sasa'.
-    """
-    # Instanciamos el objeto DSSP de Biopython.  Internamente ejecuta el
-    # binario 'mkdssp' con el fichero PDB y parsea su salida.
-    # 'structure.get_parent().header.get("filename", "")' recupera la ruta
-    # del fichero PDB original del atributo de metadatos de la estructura.
-    dssp = DSSP(structure, structure.get_parent().header.get("filename", ""))
-    # dssp.property_dict es un dict {(chain_id, residue_id): (valores_DSSP)}
-
-    # Lista donde acumularemos las filas del resultado.
-    rows = []
-
-    # Iteramos sobre todos los registros del DSSP.  Cada clave es una tupla
-    # (chain_id, residue_id) y cada valor es una tupla con propiedades del
-    # residuo: (dssp_index, aa, ss, sasa_rel, phi, psi, ...).
-    for key, values in dssp.property_dict.items():  # itera pares (clave, valores)
-        chain, residue_id = key  # desempaquetamos la tupla clave en dos variables
-
-        # Filtramos solo los residuos de la cadena de interés.
-        if chain != chain_id:  # si no es la cadena deseada...
-            continue           # ...saltamos al siguiente registro
-
-        # Extraemos el aminoácido (código de 1 letra) y el SASA relativo de
-        # los valores DSSP.  El índice [1] es el aminoácido; [3] es el SASA
-        # relativo según la convención de Biopython para DSSP.
-        aa = values[1]           # aminoácido en código de 1 letra (ej. "G")
-        sasa_rel = float(values[3])  # SASA relativo según DSSP (0.0–1.0 aprox.)
-
-        # Calculamos el SASA absoluto desnormalizando el relativo de DSSP
-        # multiplicando por el SASA máximo de Tien 2013 para este aminoácido.
-        # Si el aminoácido no está en la tabla (ej. residuo no estándar), .get()
-        # devuelve np.nan para que el valor ausente se propague correctamente.
-        sasa_abs = sasa_rel * TIEN_2013_MAX_SASA.get(aa, np.nan)  # SASA absoluto en Å²
-
-        # Añadimos la fila con los datos de este residuo.
-        rows.append({
-            "position": int(residue_id[1]),  # número de secuencia del residuo
-            "residue": aa,                    # aminoácido en código de 1 letra
-            "sasa_abs": sasa_abs,             # SASA absoluto en Å²
-            "sasa_rel": sasa_rel if relative else np.nan,  # SASA relativo (o NaN si no se pide)
-        })
-
-    # Construimos y devolvemos el DataFrame.
-    return pd.DataFrame(rows)  # DataFrame (N_residuos, 4)
-
 
 def _compute_sasa_shrake_rupley(structure, chain_id, relative):
     """Calcula el SASA usando el algoritmo de Shrake-Rupley (Python puro).
@@ -1597,48 +1542,16 @@ def _recurrent_lookup(mutations_df, min_samples=10):
     return lookup  # dict {position_int: {"recurrent": bool, "n_members_mutated": int}}
 
 
-def _single_row_lookup(df, gene, position):
-    """Busca y devuelve como dict la primera fila que coincide con gen y posición.
-
-    Función de utilidad para acceder de forma segura a un DataFrame filtrado
-    por gen y posición: si no hay coincidencia, devuelve un dict vacío en lugar
-    de lanzar un error, lo que permite que 'merge_features' use '.get()' con
-    valores por defecto.
-
-    Parameters
-    ----------
-    df : pandas.DataFrame
-        DataFrame con al menos las columnas "gene" y "position".
-    gene : str
-        Identificador del gen (ej. "KRAS").
-    position : int
-        Posición UniProt del residuo.
-
-    Returns
-    -------
-    dict
-        Diccionario con los valores de la primera fila coincidente, o {} si
-        no hay coincidencia.
-
-    Notes
-    -----
-    Esta función es privada (prefijo '_') y se llama desde 'merge_features'.
-    """
-    # Filtramos el DataFrame por gen Y posición usando el método '.eq()' de
-    # pandas.  Encadenamos ambas condiciones con '&' (AND lógico elemento a
-    # elemento sobre Series booleanas); usamos paréntesis porque '&' tiene
-    # mayor precedencia que '.eq()'.
+def _single_row_lookup(df, gene, state, position):
+    """Busca y devuelve como dict la primera fila que coincide con gen, estado y posición."""
+    
     subset = df.loc[
-        df["gene"].eq(gene) & df["position"].eq(position)
-    ]  # sub-DataFrame con las filas que coinciden en gen y posición
+        df["gene"].eq(gene)
+        & df["state"].eq(state)
+        & df["position"].eq(position)
+    ]
 
-    # Si no hay filas coincidentes, devolvemos un dict vacío para que el
-    # llamante pueda usar .get(clave, valor_por_defecto) sin errores.
-    if subset.empty:  # DataFrame sin filas
-        return {}  # dict vacío -> no hay datos para este (gen, posición)
+    if subset.empty:
+        return {}
 
-    # Tomamos la primera fila y la convertimos a dict.
-    # '.iloc[0]' accede a la primera fila por posición entera (más robusto que
-    # .loc[idx] si el índice del DataFrame original no es contiguo).
-    # '.to_dict()' convierte la Serie pandas a un dict {columna: valor}.
-    return subset.iloc[0].to_dict()  # dict {columna: valor} de la primera fila coincidente
+    return subset.iloc[0].to_dict()
