@@ -197,6 +197,8 @@ def heatmap_mutations_per_position(master_df, output_basename, **kwargs):
 
     output_base = _output_base(output_basename)
 
+    df_single_state = master_df.query("state == 'GTP'")
+    
     matrix = master_df.pivot_table(
         index="gene",
         columns="msa_position",
@@ -314,15 +316,17 @@ def clustermap_top_positions(master_df, top_n=30, output_basename=None):
     # Si no se proporciona nombre de salida, usa la ruta por defecto dentro del proyecto
     output_base = _output_base(output_basename or "figures/04_clustermap_patterns")
 
+    df_single_state = master_df.query("state == 'GTP'")
+
     # Selecciona las top_n posiciones con mayor carga mutacional total (sumando los tres genes).
     # groupby + sum colapsa todas las filas de la misma posición; sort_values ordena descendente.
     top_positions = (
-        master_df.groupby("msa_position")["total_samples"]
+        df_single_state.groupby("msa_position")["total_samples"]
         .sum().sort_values(ascending=False).head(top_n).index  # Índices (posiciones) de las top_n más mutadas
     )
 
     # Filtra el DataFrame original para quedarse solo con las posiciones seleccionadas
-    subset = master_df.loc[master_df["msa_position"].isin(top_positions)]
+    subset = df_single_state.loc[master_df["msa_position"].isin(top_positions)]
 
     # Construye la matriz posición × gen con suma de muestras por celda
     matrix = subset.pivot_table(
@@ -358,90 +362,111 @@ def clustermap_top_positions(master_df, top_n=30, output_basename=None):
     return {"png": png, "svg": svg}  # Devuelve las rutas generadas para su uso por el pipeline
 
 
-def scatter_sasa_distance(master_df, output_basename):
+def scatter_sasa_distance(master_df, output_basename, **kwargs):
     """
-    Genera un scatter plot que relaciona la accesibilidad al solvente (SASA relativa)
-    con la distancia al sitio activo de cada posición mutada.
+    Genera una figura de 3x2 paneles (filas=gen, columnas=estado) comparando
+    SASA relativa vs distancia al sitio activo para cada combinación
+    gen-estado (KRAS/HRAS/NRAS × GTP/GDP).
 
-    **Hipótesis biológica representada:**
-    Los residuos funcionalmente más relevantes en proteínas oncogénicas suelen ocupar
-    dos nichos estructurales distintos:
-      1. Residuos enterrados (SASA relativa < 0.2) y cercanos al sitio activo
-         (distancia < 5 Å): mutaciones directamente en el núcleo catalítico, como G12
-         y G13 en el P-loop, que impiden la hidrólisis del GTP por impedimento estérico.
-      2. Residuos semi-expuestos a distancia media: posiciones alostéricas que afectan
-         la dinámica de los loops Switch I y Switch II sin contacto directo con el
-         nucleótido.
-    Las líneas de referencia en SASA=0.2 y distancia=5.0 Å dividen el espacio en
-    cuatro cuadrantes con interpretación biológica diferente.
+    Replica la lógica de scatter_sasa_distance pero con:
+      - Ejes X/Y compartidos entre todos los paneles (mismo rango), para que
+        el desplazamiento de puntos entre GTP y GDP sea directamente comparable.
+      - Escala de tamaño de punto (log10(total_samples+1)) idéntica en todos
+        los paneles, usando el mismo factor de escalado que la figura original.
+      - Barra de color de entropía compartida (mismo vmin/vmax) en vez de una
+        por panel.
 
-    El tamaño de cada punto es proporcional a log10(total_samples+1), resaltando los
-    hotspots más frecuentes. El color codifica la entropía de Shannon de la posición:
-    bajo (conservado, amarillo) vs alto (variable, morado), usando la paleta viridis.
+    Nota: total_samples y shannon_entropy son propiedades de (gen, posición)
+    independientes del estado estructural, por lo que el tamaño y color de
+    los puntos serán iguales entre el panel GTP y GDP de un mismo gen; lo que
+    cambia entre columnas es la posición (x, y), reflejando cómo varía el
+    contexto estructural (SASA, distancia al sitio activo) según la
+    conformación.
 
     Args:
-        master_df (pd.DataFrame): DataFrame maestro con columnas 'sasa_rel',
-            'dist_active_site_angstrom', 'total_samples', 'shannon_entropy',
-            'uniprot_position', 'gene' y 'aa_wt'.
+        master_df (pd.DataFrame): DataFrame maestro con columnas 'gene', 'state',
+            'sasa_rel', 'dist_active_site_angstrom', 'total_samples',
+            'shannon_entropy', 'uniprot_position', 'aa_wt'.
         output_basename (str | Path): Ruta base para los ficheros de salida.
+        **kwargs: 'figsize' opcional (tuple).
 
     Returns:
         dict: Diccionario con claves 'png' y 'svg' (objetos Path).
     """
-    output_base = _output_base(output_basename)  # Normaliza la ruta base de salida
+    output_base = _output_base(output_basename)
 
-    fig, ax = plt.subplots(figsize=(7.5, 5.5))  # Figura ligeramente apaisada para dar espacio a las etiquetas
+    genes = ["KRAS", "HRAS", "NRAS"]
+    states = ["GTP", "GDP"]
 
-    plot_df = master_df.copy()  # Copia para no modificar el DataFrame original
+    # Rango de ejes compartido entre todos los paneles, calculado sobre el
+    # dataset completo para que la comparación GTP vs GDP sea directa
+    x_min, x_max = master_df["sasa_rel"].min(), master_df["sasa_rel"].max()
+    y_min, y_max = master_df["dist_active_site_angstrom"].min(), master_df["dist_active_site_angstrom"].max()
+    x_pad = (x_max - x_min) * 0.05
+    y_pad = (y_max - y_min) * 0.05
 
-    # Calcula el tamaño de cada punto en unidades de área de matplotlib.
-    # np.clip limita el rango entre 10 (mínimo visible) y 250 (máximo manejable sin solapamiento).
-    # El factor 55 es un escalado empírico para que los hotspots mayores sean llamativos pero no invasivos.
-    plot_df["point_size"] = np.clip(np.log10(plot_df["total_samples"] + 1) * 55, 10, 250)
+    # Rango de color compartido para la entropía de Shannon
+    vmin, vmax = master_df["shannon_entropy"].min(), master_df["shannon_entropy"].max()
 
-    # Dibuja el scatter: x=SASA relativa (0=enterrado, 1=totalmente expuesto),
-    # y=distancia en Ångströms al sitio activo.
-    # c=shannon_entropy: colorea por conservación evolutiva (viridis: bajo=amarillo, alto=morado).
-    # alpha=0.76 da transparencia para ver solapamientos; edgecolor blanco delimita los puntos.
-    scatter = ax.scatter(
-        plot_df["sasa_rel"],                       # Eje X: accesibilidad relativa al solvente
-        plot_df["dist_active_site_angstrom"],       # Eje Y: distancia al sitio catalítico en Å
-        s=plot_df["point_size"],                   # Área del marcador proporcional al log de muestras
-        c=plot_df["shannon_entropy"],              # Color codifica entropía de Shannon
-        cmap="viridis",                            # Paleta perceptualmente uniforme y daltónico-segura
-        alpha=0.76,                                # Transparencia para revelar superposiciones
-        edgecolor="white",                         # Borde blanco para separar puntos densos
-        linewidth=0.35,                            # Grosor mínimo del borde
+    fig, axes = plt.subplots(
+        nrows=len(genes), ncols=len(states),
+        figsize=kwargs.get("figsize", (9, 11)),
+        sharex=True, sharey=True,
     )
 
-    ax.axvline(0.2, color="#555555", linestyle="--", linewidth=1)   # Umbral convencional SASA: enterrado vs expuesto
-    ax.axhline(5.0, color="#555555", linestyle="--", linewidth=1)   # Umbral de proximidad al sitio activo (5 Å)
+    scatter_ref = None  # guarda una referencia para la colorbar compartida
 
-    ax.set_xlabel("SASA relativa")                          # Etiqueta del eje X
-    ax.set_ylabel("Distancia al sitio activo (Å)")          # Etiqueta del eje Y con unidades
-    ax.set_title("Contexto estructural de las mutaciones RAS")  # Título de la figura
+    for i, gene in enumerate(genes):
+        for j, state in enumerate(states):
+            ax = axes[i, j]
+            subset = master_df.query("gene == @gene and state == @state").copy()
 
-    # Añade barra de color para la dimensión de entropía codificada en el color
-    fig.colorbar(scatter, ax=ax, label="Entropía de Shannon")
+            subset["point_size"] = np.clip(np.log10(subset["total_samples"] + 1) * 55, 10, 250)
 
-    # Anota solo los hotspots canónicos (posiciones 12, 13, 61) con datos de muestras.
-    # .isin(HOTSPOTS) comprueba si la posición UniProt está en el diccionario de hotspots.
-    # .gt(0) excluye posiciones con cero muestras (sin datos reales).
-    annotated = plot_df.loc[
-        plot_df["uniprot_position"].isin(HOTSPOTS) & plot_df["total_samples"].gt(0)
-    ]
-    for row in annotated.itertuples():  # Itera como namedtuples para acceso eficiente por atributo
-        ax.annotate(
-            f"{row.gene} {row.aa_wt}{row.uniprot_position}",
-            (row.sasa_rel, row.dist_active_site_angstrom),
-            ha="center",
-            va="center",
-            fontsize=5,
-            color="black",
-        )
+            scatter = ax.scatter(
+                subset["sasa_rel"],
+                subset["dist_active_site_angstrom"],
+                s=subset["point_size"],
+                c=subset["shannon_entropy"],
+                cmap="viridis",
+                vmin=vmin, vmax=vmax,
+                alpha=0.76,
+                edgecolor="white",
+                linewidth=0.35,
+            )
+            scatter_ref = scatter
 
-    fig.tight_layout()  # Ajusta márgenes automáticamente
-    return _save_png_svg(fig, output_base)  # Guarda PNG y SVG; libera memoria
+            ax.axvline(0.2, color="#555555", linestyle="--", linewidth=0.8)
+            ax.axhline(5.0, color="#555555", linestyle="--", linewidth=0.8)
+
+            ax.set_xlim(x_min - x_pad, x_max + x_pad)
+            ax.set_ylim(y_min - y_pad, y_max + y_pad)
+
+            ax.set_title(f"{gene} — {state}", fontsize=10, fontweight="bold")
+
+            if i == len(genes) - 1:
+                ax.set_xlabel("SASA relativa")
+            if j == 0:
+                ax.set_ylabel("Distancia al sitio activo (Å)")
+
+            # Anota solo hotspots canónicos con muestras reales
+            annotated = subset.loc[
+                subset["uniprot_position"].isin(HOTSPOTS) & subset["total_samples"].gt(0)
+            ]
+            for row in annotated.itertuples():
+                ax.annotate(
+                    f"{row.aa_wt}{row.uniprot_position}",
+                    (row.sasa_rel, row.dist_active_site_angstrom),
+                    ha="center", va="center", fontsize=7, fontweight = "bold", color="black",
+                    xytext=(0,8), textcoords="offset points", bbox=dict(
+                        boxstyle="round,pad=0.2", facecolor="white", edgecolor="gray", linewidth=0.5, alpha=0.9
+                    )
+                )
+
+    fig.suptitle("Contexto estructural de las mutaciones RAS por isoforma y estado", fontsize=13, y=1.01)
+    fig.colorbar(scatter_ref, ax=axes, label="Entropía de Shannon", shrink=0.6, pad=0.02)
+
+    return _save_png_svg(fig, output_base)
 
 
 def view_3d_with_hotspots(pdb_id, hotspot_data, output_html, color_by="sample_count"):
@@ -589,134 +614,6 @@ def comparative_3d_view(pdb_paths_dict, hotspot_data, output_html):
     output_html.parent.mkdir(parents=True, exist_ok=True)  # Crea el directorio si no existe
     view.write_html(str(output_html))  # Exporta el visor comparativo como HTML auto-contenido
     return output_html, _OfflineView(view)  # Devuelve la ruta del HTML y un wrapper offline para visualización inline
-
-
-def summary_panel(master_df, output_path):
-    """
-    Genera un panel resumen multipanel (A–F) que integra los hallazgos principales
-    del análisis comparativo en una única figura de alta resolución.
-
-    Este panel está diseñado para incluirse como **figura de cierre del TFM** o en la
-    sección de Resultados como visión de conjunto antes del análisis detallado.
-    Integra en 13×9 pulgadas:
-
-      - **Panel A** (barras horizontales): Las 10 posiciones con mayor carga mutacional
-        total, con etiquetas gen+residuo para identificación inmediata.
-      - **Panel B** (heatmap): Mapa de calor de todas las posiciones MSA (igual que la
-        figura principal pero en miniatura, para contexto comparativo).
-      - **Panel C** (scatter): SASA vs distancia al sitio activo con tamaño proporcional
-        a muestras y color a entropía (igual que la figura principal en miniatura).
-      - **Panel D** (boxplot): Comparación de la entropía de Shannon entre posiciones
-        recurrentes y no recurrentes, para validar que la recurrencia se correlaciona
-        con conservación.
-      - **Panel E** (barras): Número de residuos recurrentes por gen, indicativo de la
-        diversidad del repertorio oncogénico de cada parálogo.
-      - **Panel F** (tabla): Estadísticas resumen numéricas del análisis (filas totales,
-        genes, posiciones recurrentes, máximo de muestras, SASA mediana).
-
-    Args:
-        master_df (pd.DataFrame): DataFrame maestro completo con todas las métricas
-            computadas por el pipeline (gene, msa_position, total_samples, sasa_rel,
-            dist_active_site_angstrom, shannon_entropy, recurrent, aa_wt,
-            uniprot_position).
-        output_path (str | Path): Ruta completa del fichero PNG de salida (incluyendo
-            extensión).
-
-    Returns:
-        Path: Ruta al fichero PNG generado.
-    """
-    output_path = Path(output_path)                        # Convierte a objeto Path
-    output_path.parent.mkdir(parents=True, exist_ok=True)  # Crea el directorio de salida si no existe
-
-    fig = plt.figure(figsize=(13, 9))  # Figura de 13×9 pulgadas (tamaño doble columna para publicación)
-
-    # GridSpec divide la figura en una cuadrícula de 3 filas × 3 columnas.
-    # height_ratios=[1.1, 1.1, 0.9] asigna más altura a los paneles superiores (gráficos)
-    # que al inferior (tabla de estadísticas).
-    gs = fig.add_gridspec(3, 3, height_ratios=[1.1, 1.1, 0.9])
-
-    ax_a = fig.add_subplot(gs[0, 0])    # Panel A: celda (fila 0, columna 0) — barras horizontales
-    ax_b = fig.add_subplot(gs[0, 1:])   # Panel B: celdas (fila 0, columnas 1 y 2) — heatmap ancho
-    ax_c = fig.add_subplot(gs[1, 0])    # Panel C: celda (fila 1, columna 0) — scatter SASA vs distancia
-    ax_d = fig.add_subplot(gs[1, 1])    # Panel D: celda (fila 1, columna 1) — boxplot entropía
-    ax_e = fig.add_subplot(gs[1, 2])    # Panel E: celda (fila 1, columna 2) — barras residuos recurrentes
-    ax_f = fig.add_subplot(gs[2, :])    # Panel F: toda la fila 2 — tabla de estadísticas
-
-    # -- Panel A: Top 10 posiciones más mutadas (barras horizontales) --
-    top = master_df.sort_values("total_samples", ascending=False).head(10)  # Selecciona las 10 más mutadas
-    labels = [f"{row.gene} {row.aa_wt}{row.uniprot_position}" for row in top.itertuples()]  # Etiquetas "KRAS G12"
-    ax_a.barh(labels[::-1], top["total_samples"].iloc[::-1], color="#4C78A8")  # Orden ascendente en el eje Y (mayor arriba)
-    ax_a.set_title("A. Posiciones más mutadas")  # Título del panel
-    ax_a.set_xlabel("Muestras")                  # Etiqueta del eje X
-
-    # -- Panel B: Heatmap de mutaciones por posición MSA (en miniatura) --
-    matrix = master_df.pivot_table(
-        index="gene",           # Filas: gen
-        columns="msa_position", # Columnas: posición MSA
-        values="total_samples", # Valores: suma de muestras
-        aggfunc="sum",          # Función de agregación
-        fill_value=0,           # Rellena celdas vacías con cero
-    ).reindex(["KRAS", "HRAS", "NRAS"])  # Orden canónico de genes
-    sns.heatmap(np.log10(matrix + 1), cmap="cividis", ax=ax_b, cbar=False)  # Sin barra de color para ahorrar espacio
-    ax_b.set_title("B. Mapa de calor de mutaciones")  # Título del panel
-    ax_b.set_xlabel("Posición MSA")                   # Etiqueta del eje X
-    ax_b.set_ylabel("")                               # Sin etiqueta en Y (los genes ya se ven en las celdas)
-
-    # -- Panel C: Scatter SASA vs distancia (en miniatura) --
-    ax_c.scatter(
-        master_df["sasa_rel"],                  # Eje X: SASA relativa
-        master_df["dist_active_site_angstrom"], # Eje Y: distancia al sitio activo
-        s=np.clip(np.log10(master_df["total_samples"] + 1) * 55, 8, 180),  # Tamaño proporcional a muestras (rango reducido)
-        c=master_df["shannon_entropy"],         # Color por entropía de Shannon
-        cmap="viridis",                         # Paleta viridis (coherente con figura principal)
-        alpha=0.75,                             # Transparencia para revelar solapamientos
-    )
-    ax_c.set_title("C. SASA vs distancia")  # Título del panel
-    ax_c.set_xlabel("SASA relativa")        # Etiqueta del eje X
-    ax_c.set_ylabel("Distancia (Å)")        # Etiqueta del eje Y
-
-    # -- Panel D: Boxplot de entropía en posiciones recurrentes vs no recurrentes --
-    # Valida si las posiciones recurrentes están más conservadas (menor entropía)
-    sns.boxplot(data=master_df, x="recurrent", y="shannon_entropy", ax=ax_d, color="#72B7B2")
-    ax_d.set_title("D. Conservación")   # Título del panel
-    ax_d.set_xlabel("Recurrente")       # Eje X: booleano (True/False)
-    ax_d.set_ylabel("Entropía")         # Eje Y: entropía de Shannon de la posición
-
-    # -- Panel E: Número de residuos recurrentes por gen --
-    # Agrupa por gen solo las filas con recurrent=True y cuenta cuántas hay
-    recurrent_counts = master_df.loc[master_df["recurrent"]].groupby("gene").size()
-    ax_e.bar(recurrent_counts.index, recurrent_counts.values, color="#54A24B")  # Barras verticales en verde NRAS
-    ax_e.set_title("E. Residuos recurrentes")  # Título del panel
-    ax_e.set_ylabel("Conteo")                  # Etiqueta del eje Y
-
-    # -- Panel F: Tabla de estadísticas resumen --
-    ax_f.axis("off")  # Oculta los ejes del subplot para usar todo el espacio para la tabla
-
-    # Construye el DataFrame de estadísticas clave del análisis
-    stats = pd.DataFrame({
-        "Métrica": ["Filas totales", "Genes", "Posiciones recurrentes", "Máx. muestras", "SASA rel. mediana"],
-        "Valor": [
-            len(master_df),                                                          # Número total de filas en el maestro
-            master_df["gene"].nunique(),                                             # Número de genes distintos (debería ser 3)
-            master_df.loc[master_df["recurrent"], "msa_position"].nunique(),         # Posiciones MSA únicas marcadas como recurrentes
-            int(master_df["total_samples"].max()),                                   # Máximo de muestras en una sola posición/gen
-            f"{master_df['sasa_rel'].median():.2f}",                                 # Mediana de SASA (2 decimales)
-        ],
-    })
-
-    # ax_f.table incrusta una tabla matplotlib en el área del subplot.
-    # cellText: valores como lista de listas; colLabels: cabeceras; loc="center": centra la tabla.
-    table = ax_f.table(cellText=stats.values, colLabels=stats.columns, loc="center", cellLoc="left")
-    table.auto_set_font_size(False)  # Desactiva el ajuste automático de fuente para usar set_fontsize
-    table.set_fontsize(9)            # Tamaño de fuente 9 pt: legible pero compacto
-    table.scale(1, 1.4)              # Escala filas al 140% de altura para mejor legibilidad
-
-    ax_f.set_title("F. Resumen integrado de features")  # Título sobre la tabla
-
-    fig.tight_layout()                       # Ajusta márgenes y espaciado entre paneles
-    fig.savefig(output_path, dpi=300)        # Guarda la figura a 300 dpi (resolución de publicación)
-    plt.close(fig)                           # Libera la memoria de la figura
-    return output_path                       # Devuelve la ruta del fichero generado
 
 
 # ===========================================================================

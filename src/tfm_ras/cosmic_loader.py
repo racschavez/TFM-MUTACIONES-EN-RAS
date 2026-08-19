@@ -100,40 +100,32 @@ def filter_somatic_missense(df: pd.DataFrame, cfg_filters: dict) -> pd.DataFrame
     n_somaticas = len(df_somaticas)
 
     #Filtrando por mutaciones missense
-    df_filtrado = df_somaticas[(
+    df_missense = df_somaticas[(
         df_somaticas["MUTATION_DESCRIPTION"] == cfg_filters['mutation_description_contains'])
         &
         (df_somaticas["MUTATION_AA"].str.match(r"^p\.([A-Z])(\d+)([A-Z])$", na=False))
     ]
-    
     #Conteo de mutaciones missense
-    n_missense = len(df_filtrado)
-    n_final = len(df_filtrado)
+    n_missense = len(df_missense)
+
+    #Eliminar duplicados por muestra y cambio proteico
+    df_filt_dup = df_missense.drop_duplicates(subset=["COSMIC_SAMPLE_ID", "MUTATION_AA"])
 
     #Mostrar resumen de conteos
     summary = pd.DataFrame([{
         "Conteo Inicial": n_inicial,
         "Mutaciones Somáticas": n_somaticas,
         "Mutaciones Missense": n_missense,
-        "Conteo Final": n_final
+        "Data Frame Filtrado y Depuplicado": len(df_filt_dup)
     }])
 
     display(summary.style.hide(axis="index"))
 
     #DataFrame filtrado
-    return df_filtrado
+    return df_filt_dup
 
     # TODO(alumno): usar los filtros declarados en configs/config.yaml y guardar
     # conteos n_inicial -> n_somaticas -> n_missense -> n_final.
-
-
-def deduplicate_by_sample(df: pd.DataFrame) -> pd.DataFrame:
-    """
-    Elimina duplicados manteniendo una mutacion por muestra y cambio proteico.
-    """
-    df_dedup = df.drop_duplicates(subset=["COSMIC_SAMPLE_ID", "MUTATION_AA"])
-
-    return df_dedup
 
 
 def parse_aa_change(hgvs_p: str) -> tuple[str, int, str]:

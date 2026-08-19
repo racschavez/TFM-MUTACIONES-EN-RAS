@@ -158,6 +158,34 @@ from Bio.PDB.Structure import Structure
 # debe cambiar en tiempo de ejecución.
 GENES = ("KRAS", "HRAS", "NRAS")
 
+# Un solo diccionario de colores por gen, reutilizado en TODOS los paneles
+# de las dos figuras. Mantener el mismo mapeo color->gen
+GENE_COLORS = {"KRAS": "#4C78A8", "HRAS": "#F0963C", "NRAS": "#A04BA2"}
+ 
+# El estado se codifica con tipo de línea en todos los paneles solapados.
+STATE_LINESTYLES = {"GTP": "-", "GDP": "--"}
+
+STATE_ALPHAS = {"GTP": 1.0, "GDP": 0.55}
+
+FUNCTIONAL_REGIONS = {
+    "P-loop": (10, 17),
+    "Switch I": (30, 38),
+    "Switch II": (60, 76),
+    "NKxD": (116, 119),
+    "SAK": (145, 147),
+    }
+
+HOTSPOTS_Y = {
+    12: 0.03,
+    13: 0.12,   # subida para no chocar con el 12
+    59: 0.03,
+    61: 0.12,   # subida para no chocar con el 59
+    117: 0.03,
+    146: 0.03,
+}
+
+
+
 # Posición final del dominio G (GTPase domain) en la numeración UniProt.
 # Los residuos 1–166 corresponden al dominio catalítico conservado entre los
 # tres parálogos; a partir del residuo 167 comienza la región hipervariable
@@ -1005,234 +1033,171 @@ def merge_features(mutations_df, sasa_df, distance_df, conservation_df, position
     return pd.DataFrame(rows, columns=MASTER_COLUMNS)  # tabla maestra (N_filas, 12)
 
 
-def plot_features_overview(master_df, output_path, state=None):
-    """Genera y guarda un panel de cuatro subgráficos de la tabla maestra.
-
-    Produce una figura de alta resolución (300 dpi) con cuatro paneles
-    apilados verticalmente, compartiendo el eje X (posición MSA):
-
-    1. SASA relativo por posición MSA (línea por gen).
-    2. Distancia al sitio activo en Å (línea por gen).
-    3. Entropía de Shannon en bits (barras en gris, una por posición MSA).
-    4. log₁₀(muestras tumorales + 1) (barras apiladas/solapadas por gen).
-
-    Las regiones de los lazos Switch I (10–17), P-loop (30–38) y Switch II
-    (60–76) se sombrean con una capa gris translúcida.  Las posiciones
-    hotspot canónicas (12, 13, 61) se marcan con líneas verticales punteadas.
-
+def plot_feature_by_state(master_df, output_path, feature_col, y_label, fig_title):
+    """Función interna compartida por 'plot_sasa_by_state' y
+    'plot_distance_by_state'. 
+ 
+        Fila 1 -> Estado GTP
+        Fila 2 -> Estado GDP
+        Fila 3 -> Ambos estados solapados
+ 
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+ 
+    fig, axes = plt.subplots(3, 1, figsize=(14, 12), sharex=True)
+ 
+    row_states = {0: ("GTP",), 1: ("GDP",), 2: ("GTP", "GDP")}
+    row_titles = {0: "GTP", 1: "GDP", 2: "GTP vs GDP"}
+ 
+    for row, states_in_row in row_states.items():
+        overlapped = len(states_in_row) > 1
+ 
+        for gene in GENES:
+            for state in states_in_row:
+                subset = (
+                    master_df[
+                        (master_df["gene"] == gene) & (master_df["state"] == state)
+                    ]
+                    .sort_values("msa_position")
+                )
+ 
+                axes[row].plot(
+                    subset["msa_position"], subset[feature_col],
+                    color=GENE_COLORS[gene],
+                    linestyle=STATE_LINESTYLES[state],
+                    alpha=STATE_ALPHAS[state] if overlapped else 1.0,
+                    label=f"{gene} {state}" if overlapped else gene,
+                )
+ 
+        axes[row].set_ylabel(f"{row_titles[row]}\n{y_label}")
+        _annotate_axis(axes[row])
+        axes[row].legend(ncol=3, loc="upper right", fontsize=8)
+ 
+    axes[2].set_xlabel("Posición MSA")
+ 
+    fig.suptitle(fig_title, fontsize=16)
+    fig.tight_layout(rect=[0, 0, 1, 0.97])
+ 
+    fig.savefig(output_path, dpi=300)
+    plt.close(fig)
+ 
+    return output_path
+ 
+ 
+def plot_sasa_by_state(master_df, output_path):
+    """SASA relativo por estado (GTP / GDP / ambos solapados), un panel
+    por fila a ancho completo, comparando las 3 isoformas de RAS.
+ 
     Parameters
     ----------
     master_df : pandas.DataFrame
         Tabla maestra devuelta por 'merge_features'.
     output_path : str or Path
-        Ruta donde se guardará la figura (ej. "results/figures/overview.png").
-        El directorio padre se crea automáticamente si no existe.
-    state : str or None
-        Si se especifica ("GTP" o "GDP"), filtra la tabla maestra a ese
-        estado antes de graficar. Si es None, se usan ambos estados.
-
+        Ruta donde se guardará la figura.
+ 
     Returns
     -------
     Path
         Ruta al fichero de imagen guardado.
-
-    Examples
-    --------
-    >>> out = plot_features_overview(master_df, "results/figures/overview.png")
-    >>> print(out)
-    results/figures/overview.png
     """
-    # Convertimos la ruta de salida a objeto Path para poder usar
-    # '.parent.mkdir()' de forma portable.
-    output_path = Path(output_path)  # ej. "results/figures/overview.png"
-
-    # Creamos el directorio padre si no existe (y todos los intermedios).
+    return plot_feature_by_state(
+        master_df, output_path,
+        feature_col="sasa_rel",
+        y_label="SASA rel.",
+        fig_title="RAS – SASA relativo por estado",
+    )
+ 
+ 
+def plot_distance_by_state(master_df, output_path):
+    """Distancia al sitio activo por estado (GTP / GDP / ambos solapados),
+    un panel por fila a ancho completo, comparando las 3 isoformas de RAS.
+ 
+    Parameters
+    ----------
+    master_df : pandas.DataFrame
+        Tabla maestra devuelta por 'merge_features'.
+    output_path : str or Path
+        Ruta donde se guardará la figura.
+ 
+    Returns
+    -------
+    Path
+        Ruta al fichero de imagen guardado.
+    """
+    return plot_feature_by_state(
+        master_df, output_path,
+        feature_col="dist_active_site_angstrom",
+        y_label="Dist. sitio activo (Å)",
+        fig_title="RAS – Distancia al sitio activo por estado",
+    )
+ 
+ 
+def plot_entropy_and_samples(master_df, output_path, state_for_samples="GTP"):
+    """Genera una figura de 2 paneles, independiente del estado GTP/GDP:
+ 
+        Panel 1 -> Entropía de Shannon (bits) por posición MSA.
+        Panel 2 -> log10(muestras tumorales COSMIC + 1) por gen y posición.
+ 
+    Parameters
+    ----------
+    master_df : pandas.DataFrame
+        Tabla maestra devuelta por 'merge_features'.
+    output_path : str or Path
+        Ruta donde se guardará la figura.
+    state_for_samples : str
+        Estado ("GTP" o "GDP") del que se toman 'total_samples'. El
+        resultado es idéntico elijas el que elijas, ya que el valor no
+        varía entre estados — se pide explícito para dejar claro en el
+        código que hay una sola fuente de verdad.
+ 
+    Returns
+    -------
+    Path
+        Ruta al fichero de imagen guardado.
+    """
+    output_path = Path(output_path)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-
-    if state is not None:
-        master_df = master_df.loc[master_df["state"] == state].copy()
-
-    # Creamos la figura con 4 subplots en columna.  'sharex=True' hace que
-    # todos los ejes compartan el mismo eje X, de forma que al hacer zoom en
-    # uno se ajustan todos.  'figsize=(13, 9)' define el tamaño en pulgadas.
-    fig, axes = plt.subplots(4, 1, figsize=(13, 9), sharex=True)
-
-    # Paleta de colores por gen: se usa la paleta de Vega-Lite para que los
-    # colores sean perceptualmente distinguibles y reproducibles entre figuras.
-    colors = {"KRAS": "#4C78A8", "HRAS": "#F58518", "NRAS": "#54A24B"}
-
-    # --- Trazado de datos por gen --------------------------------------------
-    linestyles = {
-        "GDP": "--",
-        "GTP": "-"
-    }
-
+ 
+    df_single_state = master_df[master_df["state"] == state_for_samples]
+ 
+    fig, axes = plt.subplots(2, 1, figsize=(13, 6), sharex=True)
+ 
+    entropy = (
+        df_single_state.drop_duplicates("msa_position").sort_values("msa_position")
+    )
+    axes[0].bar(entropy["msa_position"], entropy["shannon_entropy"], color="#9D9D9D")
+    axes[0].set_ylabel("Entropía (bits)")
+ 
     for gene in GENES:
-
-        # --- Panel 3: muestras tumorales (independiente del estado GTP/GDP) --
-        # 'total_samples' no varía entre GTP y GDP para un mismo gen y posición
-        # (viene de COSMIC, no de la estructura), así que se calcula UNA sola
-        # vez por gen, fuera del bucle de estados, para evitar:
-        #   (a) dibujarlo dos veces superpuesto cuando state=None, y
-        #   (b) que salga vacío cuando se filtra a un solo estado y ese
-        #       estado no coincide con la última iteración del bucle interno.
         gene_samples = (
-            master_df[master_df["gene"] == gene]
-            .drop_duplicates("msa_position")
+            df_single_state[df_single_state["gene"] == gene]
             .sort_values("msa_position")
         )
-
-        for current_state in ["GDP", "GTP"]:
-
-            subset = (
-                master_df[
-                    (master_df["gene"] == gene) &
-                    (master_df["state"] == current_state)
-                ]
-                .sort_values("msa_position")
-            )
-
-            axes[0].plot(
-                subset["msa_position"],
-                subset["sasa_rel"],
-                color=colors[gene],
-                linestyle=linestyles[current_state],
-                label=f"{gene} {current_state}",
-            )
-
-            axes[1].plot(
-                subset["msa_position"],
-                subset["dist_active_site_angstrom"],
-                color=colors[gene],
-                linestyle=linestyles[current_state],  # FIX: antes era linestyles[state]
-            )
-
-        # Panel 3: log₁₀(muestras + 1).  Se usa log porque los recuentos de
-        # mutaciones tienen distribuciones muy sesgadas (G12D en KRAS tiene
-        # miles de muestras vs. pocas en otras posiciones).  Se suma 1 antes
-        # del log para evitar log(0) cuando no hay muestras ('total_samples=0').
-        # 'alpha=0.35' hace las barras semitransparentes para que se vean las
-        # de los tres genes solapadas.
-        # FIX: se dibuja una sola vez por gen (fuera del bucle de estados),
-        # usando 'gene_samples' en vez de 'subset'.
-        axes[3].bar(
+        axes[1].bar(
             gene_samples["msa_position"],
             np.log10(gene_samples["total_samples"] + 1),
             alpha=0.35,
             label=gene,
-            color=colors[gene],
+            color=GENE_COLORS[gene],
         )
-
-    # --- Panel 2: entropía de Shannon (independiente del gen) ----------------
-
-    # La entropía del MSA es la misma para los tres genes en una posición dada
-    # (ya que se calcula a partir del MSA multi-gen compartido), por lo que
-    # eliminamos duplicados de msa_position antes de graficar.
-    # '.drop_duplicates("msa_position")' conserva solo la primera fila de cada
-    # valor de msa_position; '.sort_values("msa_position")' ordena por posición
-    # para que las barras aparezcan de izquierda a derecha.
-    entropy = master_df.drop_duplicates("msa_position").sort_values("msa_position")
-
-    # Panel 2: barras de entropía en gris neutro (no codificadas por gen).
-    axes[2].bar(entropy["msa_position"], entropy["shannon_entropy"], color="#9D9D9D")
-
-    # --- Etiquetas de los ejes Y ---------------------------------------------
-    axes[0].set_ylabel("SASA rel.")                   # fracción de superficie expuesta
-    axes[1].set_ylabel("Dist. sitio activo (Å)")      # distancia mínima en ångströms
-    axes[2].set_ylabel("Entropía (bits)")             # entropía de Shannon en bits
-    axes[3].set_ylabel("log10(muestras+1)")           # escala logarítmica de muestras tumorales
-
-    # Etiqueta del eje X solo en el panel inferior (los demás comparten el eje).
-    axes[3].set_xlabel("Posición MSA")
-
-    # --- Elementos de anotación biológica ------------------------------------
-    for ax in axes:  # aplica a los cuatro paneles
-
-        # Sombreado gris claro (alpha=0.05) para regiones funcionalmente
-        # importantes del dominio G de RAS:
-        # P-loop (motivo G1, residuos 10-17)
-        # Switch I (residuos 30-38)
-        # Switch II (residuos 60-76)
-        # NKxD (residuos 116-119)
-        # SAK (residuos 145-147)
-
-        FUNCTIONAL_REGIONS = {
-            "P-loop": (10, 17),
-            "Switch I": (30, 38),
-            "Switch II": (60, 76),
-            "NKxD": (116, 119),
-            "SAK": (145, 147),
-            }
-
-        for region, (start, end) in FUNCTIONAL_REGIONS.items():
-
-            # Región sombreada
-            ax.axvspan(start, end, color="black", alpha=0.05)
-
-            # Etiqueta de la región
-            ax.text(
-                (start + end)/2,
-                0.98,
-                region,
-                transform=ax.get_xaxis_transform(),
-                ha="center",
-                va="top",
-                fontsize=8,
-                color="dimgray",
-                bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.5)
-                )
-
-        # Líneas verticales punteadas en los hotspots oncogénicos canónicos
-        for position in (12, 13, 61, 146, 117, 59):
-
-            ax.axvline(position,
-                    color="black",
-                    linewidth=0.8,
-                    linestyle="--")
-
-            ax.text(
-                position,
-                0.03,                     # 3 % desde abajo
-                str(position),
-                transform=ax.get_xaxis_transform(),
-                ha="center",
-                va="bottom",
-                fontsize=7,
-                color="dimgray",
-                bbox=dict(facecolor="white",
-                        alpha=0.6,
-                        edgecolor="none",
-                        pad=0.2)
-            )
-
-        # Cuadrícula gris muy suave para facilitar la lectura de valores.
-        ax.grid(alpha=0.2)
-
-    # Leyenda en el panel 0 con los tres genes, en 3 columnas para ahorrar espacio.
-    axes[0].legend(ncol=3, loc="upper right")
-
-    # 'tight_layout()' ajusta automáticamente los márgenes para evitar que las
-    # etiquetas de los ejes se superpongan entre paneles.
-    if state is None:
-        fig.suptitle("RAS - Todos los estados", fontsize=15)
-    else:
-        fig.suptitle(f"RAS - Estado {state}", fontsize=15)
-
-    fig.tight_layout(rect=[0, 0, 1, 0.97])
-
-    # Guardamos la figura en el fichero de salida a 300 dpi (resolución
-    # adecuada para publicación científica).  Matplotlib infiere el formato
-    # (PNG, PDF, SVG…) a partir de la extensión del fichero.
+    axes[1].set_ylabel("log10(muestras+1)")
+    axes[1].set_xlabel("Posición MSA")
+    axes[1].legend(ncol=3, loc="upper right", fontsize=8)
+ 
+    for ax in axes:
+        _annotate_axis(ax)
+ 
+    fig.suptitle(
+        f"RAS – Entropía y Recurrencia mutacional por posición MSA\n",
+        fontsize=15,
+    )
+    fig.tight_layout(rect=[0, 0, 1, 0.95])
+ 
     fig.savefig(output_path, dpi=300)
-
-    # Cerramos la figura para liberar memoria.  Sin esto, matplotlib acumula
-    # figuras en memoria si la función se llama múltiples veces.
     plt.close(fig)
-
-    # Devolvemos la ruta al fichero generado para que el llamante pueda
-    # registrarla en un log o pasarla a otro proceso.
-    return output_path  # ruta al fichero de imagen guardado
-
+ 
+    return output_path
 
 # ===========================================================================
 # Funciones privadas (auxiliares, no forman parte de la API pública)
@@ -1555,3 +1520,29 @@ def _single_row_lookup(df, gene, state, position):
         return {}
 
     return subset.iloc[0].to_dict()
+
+def _annotate_axis(ax):
+    """Aplica a un eje el sombreado de regiones funcionales, las líneas
+    verticales de hotspots (con etiquetas en la altura fijada en
+    HOTSPOTS_Y) y la cuadrícula. Se factoriza aparte porque se repite
+    igual en las dos figuras.
+    """
+    for region, (start, end) in FUNCTIONAL_REGIONS.items():
+        ax.axvspan(start, end, color="black", alpha=0.05)
+        ax.text(
+            (start + end) / 2, 0.98, region,
+            transform=ax.get_xaxis_transform(),
+            ha="center", va="top", fontsize=8, color="dimgray",
+            bbox=dict(facecolor="white", alpha=0.7, edgecolor="none", pad=0.5),
+        )
+ 
+    for position, y in HOTSPOTS_Y.items():
+        ax.axvline(position, color="black", linewidth=0.8, linestyle="--")
+        ax.text(
+            position, y, str(position),
+            transform=ax.get_xaxis_transform(),
+            ha="center", va="bottom", fontsize=7, color="dimgray",
+            bbox=dict(facecolor="white", alpha=0.6, edgecolor="none", pad=0.2),
+        )
+ 
+    ax.grid(alpha=0.2)
