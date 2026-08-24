@@ -71,7 +71,20 @@ HOTSPOTS = {12: "G12", 13: "G13", 61: "Q61", 146: "A146", 117: "K117", 59:"A59"}
 #   MG   = ion magnesio coordinado por el nucleótido (esencial para la actividad GTPasa)
 LIGAND_RESNAMES = ["GDP", "GTP", "GNP", "GCP", "MG"]
 
-
+STRUCTURE_REGISTRY = {
+    "KRAS": {
+        "GTP": {"pdb_id": "5UK9", "chain": "B"},
+        "GDP": {"pdb_id": "4OBE", "chain": "A"},
+    },
+    "HRAS": {
+        "GTP": {"pdb_id": "3K8Y", "chain": "A"},
+        "GDP": {"pdb_id": "4Q21", "chain": "A"},
+    },
+    "NRAS": {
+        "GTP": {"pdb_id": "5UHV", "chain": "A"},
+        "GDP": {"pdb_id": "3CON", "chain": "A"},
+    },
+}
 # ===========================================================================
 # Clase auxiliar: visor py3Dmol con JavaScript embebido (sin CDN)
 # ===========================================================================
@@ -436,7 +449,7 @@ def scatter_sasa_distance(master_df, output_basename, **kwargs):
             )
             scatter_ref = scatter
 
-            ax.axvline(0.2, color="#555555", linestyle="--", linewidth=0.8)
+            ax.axvline(0.25, color="#555555", linestyle="--", linewidth=0.8)
             ax.axhline(5.0, color="#555555", linestyle="--", linewidth=0.8)
 
             ax.set_xlim(x_min - x_pad, x_max + x_pad)
@@ -469,152 +482,373 @@ def scatter_sasa_distance(master_df, output_basename, **kwargs):
     return _save_png_svg(fig, output_base)
 
 
-def view_3d_with_hotspots(pdb_id, hotspot_data, output_html, color_by="sample_count"):
+def view_3d_with_hotspots(pdb_id, hotspot_data, output_html, color_by="sample_count", chain="A"):
     """
     Genera una vista 3D interactiva de la estructura de un parálogo RAS con los
     hotspots mutacionales coloreados cuantitativamente, exportada como HTML.
-
-    **py3Dmol** es una librería Python que genera código JavaScript para el visor
-    molecular 3Dmol.js (WebGL). La función write_html() produce un fichero HTML
-    auto-contenido con todo el JavaScript incrustado: se abre directamente en cualquier
-    navegador moderno sin instalar nada, lo que lo hace ideal para incluir como anexo
-    interactivo en la memoria digital del TFM o compartir con el tribunal.
-
-    El protocolo de visualización es:
-      1. La cadena principal (backbone) se muestra en representación de cinta
-         (cartoon) gris claro para no distraer del detalle de los hotspots.
-      2. Los ligandos (GDP/GTP y Mg) se muestran como varillas (stick) con esquema
-         de color greenCarbon para distinguirlos del esqueleto proteico.
-      3. Cada residuo hotspot se representa como una esfera cuyo color varía de
-         azul (valor bajo) a rojo (valor alto) mediante interpolación lineal en RGB
-         (función _metric_color), y cuyo radio también aumenta con el valor para
-         un doble código visual (color + tamaño).
-
+ 
+ 
     Args:
-        pdb_id (str | Path): Identificador PDB (p. ej. '4OBE') o ruta directa al
-            fichero .pdb. Si es un identificador se busca en data/external/pdb/.
-        hotspot_data (pd.DataFrame | list[dict]): Datos de los hotspots con columnas
-            'uniprot_position' (o 'position') y la métrica indicada en color_by
-            (o 'total_samples' como alias de 'sample_count').
+        pdb_id (str | Path): Identificador PDB o ruta directa al fichero .pdb.
+        hotspot_data (pd.DataFrame | list[dict]): Datos de los hotspots.
         output_html (str | Path): Ruta del fichero HTML de salida.
-        color_by (str): Columna de hotspot_data que determina el color/tamaño de las
-            esferas. Por defecto 'sample_count' (número de muestras oncogénicas).
-
+        color_by (str): Columna que determina el color/tamaño de las esferas.
+        chain (str): Cadena de la estructura a representar (por defecto "A";
+            usar "B" para KRAS-GTP/5UK9).
+ 
     Returns:
-        tuple[Path, py3Dmol.view]: Ruta al fichero HTML generado y el objeto view
-            para visualización inline en Jupyter (usar como última expresión de la celda).
+        tuple[Path, py3Dmol.view]: Ruta al HTML y el visor (usar como última
+            expresión de la celda de Jupyter para verlo inline con zoom/rotación).
     """
-    pdb_path = _resolve_pdb_path(pdb_id)        # Resuelve la ruta al fichero PDB local
-    pdb_text = pdb_path.read_text(encoding="utf-8")  # Lee el contenido del PDB como texto plano
-
-    hotspot_data = _normalize_hotspot_data(hotspot_data)  # Estandariza nombres de columnas
-
-    # Calcula el valor máximo de la métrica para normalizar colores entre 0 y 1.
-    # Se fuerza un mínimo de 1.0 para evitar división por cero cuando hotspot_data está vacío.
+    pdb_path = _resolve_pdb_path(pdb_id)
+    pdb_text = pdb_path.read_text(encoding="utf-8")
+ 
+    hotspot_data = _normalize_hotspot_data(hotspot_data)
     max_value = max(float(hotspot_data[color_by].max()), 1.0) if not hotspot_data.empty else 1.0
+ 
+    view = py3Dmol.view(width=820, height=560)
+    view.addModel(pdb_text, "pdb")
 
-    view = py3Dmol.view(width=820, height=560)  # Inicializa el visor con dimensiones en píxeles
-
-    view.addModel(pdb_text, "pdb")  # Carga el texto PDB en el visor (formato "pdb" activa el parser de 3Dmol.js)
-
-    # Representación base: cinta gris claro para toda la proteína
-    view.setStyle({"cartoon": {"color": "lightgray"}})
-
-    # Sobrescribe el estilo de los ligandos con varillas de carbono verde para destacarlos
-    view.addStyle({"resn": LIGAND_RESNAMES}, {"stick": {"colorscheme": "greenCarbon"}})
-
-    # Itera sobre cada hotspot y le asigna una esfera con color y radio proporcionales al valor
+    view.setStyle({}, {})
+ 
+    view.setStyle({"chain": chain}, {"cartoon": {"color": "lightgray"}})
+    view.addStyle({"chain": chain, "resn": LIGAND_RESNAMES}, {"stick": {"colorscheme": "greenCarbon"}})
+ 
     for row in hotspot_data.itertuples():
-        value = float(getattr(row, color_by))  # Valor de la métrica para este hotspot (float)
+        value = float(getattr(row, color_by))
         view.addStyle(
-            {"chain": "A", "resi": int(row.uniprot_position)},  # Selector: cadena A, número de residuo
+            {"chain": chain, "resi": int(row.uniprot_position)},
             {
                 "sphere": {
-                    "color": _metric_color(value, max_value),                    # Color azul→rojo según valor
-                    "radius": 0.75 + min(value / max_value, 1.0) * 0.55,         # Radio: 0.75 Å (mín) a 1.30 Å (máx)
+                    "color": _metric_color(value, max_value),
+                    "radius": 0.75 + min(value / max_value, 1.0) * 0.55,
                 }
             },
         )
+ 
+    view.zoomTo()
+ 
+    output_html = Path(output_html)
+    output_html.parent.mkdir(parents=True, exist_ok=True)
+    view.write_html(str(output_html))
+    return output_html, _OfflineView(view)
 
-    view.zoomTo()  # Centra y ajusta el zoom para encuadrar toda la proteína
 
-    output_html = Path(output_html)                      # Convierte a objeto Path
-    output_html.parent.mkdir(parents=True, exist_ok=True)  # Crea el directorio de salida si no existe
-    view.write_html(str(output_html))  # Exporta el visor como HTML auto-contenido (JavaScript incrustado)
-    return output_html, _OfflineView(view)  # Devuelve la ruta del HTML y un wrapper offline para visualización inline
-
-
-def comparative_3d_view(pdb_paths_dict, hotspot_data, output_html):
+def comparative_3d_view(pdb_paths_dict, hotspot_data, output_html, chains=None, hotspot_color="#BE61E6", show_labels=True, opacity=0.88):
     """
-    Genera una vista 3D comparativa de los tres parálogos RAS superpuestos
-    estructuralmente en un único visor WebGL exportado como HTML.
-
-    **Superposición estructural (structural alignment):** Los tres parálogos comparten
-    el dominio G (residuos 1–166) con >85% de identidad de secuencia. La función
-    _aligned_pdb_texts() superpone HRAS y NRAS sobre KRAS como referencia minimizando
-    el RMSD de los átomos Cα de ese dominio catalítico conservado. Esto permite
-    comparar visualmente las diferencias conformacionales en los loops Switch I y II,
-    que son los determinantes moleculares de la especificidad de señalización de cada
-    parálogo.
-
-    Cada gen se colorea con su color canónico (GENE_COLORS) en transparencia moderada
-    (opacity=0.72) para que las tres cintas puedan verse simultáneamente. Los hotspots
-    de cada gen se marcan con esferas del mismo color que su cinta.
-
-    El visor HTML resultante es adecuado para incluir como **Figura Suplementaria
-    Interactiva** en el repositorio del TFM o como enlace desde la memoria digital.
-
+    Genera una vista 3D comparativa de varios parálogos RAS (o de varias conformaciones) superpuestos estructuralmente en un único visor WebGL.
+ 
     Args:
-        pdb_paths_dict (dict[str, str | Path]): Diccionario {gen: ruta_pdb},
-            p. ej. {"KRAS": "data/external/pdb/4OBE.pdb", "HRAS": ..., "NRAS": ...}.
-            El primer gen en orden de inserción se usará como referencia de superposición.
-        hotspot_data (pd.DataFrame | list[dict]): Datos de hotspots con columnas
-            'gene' y 'uniprot_position' (o 'position').
+        pdb_paths_dict (dict[str, str | Path]): {etiqueta: id_pdb o ruta}.
+            El primer elemento en orden de inserción es la referencia fija
+            de la superposición.
+        hotspot_data (pd.DataFrame | list[dict] | None): hotspots a marcar
+            (columnas 'gene' y 'uniprot_position'). None → sin hotspots.
         output_html (str | Path): Ruta del fichero HTML de salida.
-
+        chains (dict[str, str] | None): {etiqueta: cadena}. None → "A" para
+            todas las etiquetas.
+        hotspot_color (str): color de la cinta en las posiciones hotspot.
+        show_labels (bool): si True (por defecto), añade el nombre de cada
+            hotspot sobre la estructura de referencia.
+ 
     Returns:
-        tuple[Path, py3Dmol.view]: Ruta al fichero HTML generado y el objeto view
-            para visualización inline en Jupyter (usar como última expresión de la celda).
+        tuple[Path, py3Dmol.view]: Ruta al HTML y el visor (usar como última
+            expresión de la celda de Jupyter).
     """
-    # Superpone las tres estructuras y devuelve sus textos PDB alineados
-    aligned_models = _aligned_pdb_texts(pdb_paths_dict)
-
-    hotspot_data = _normalize_hotspot_data(hotspot_data)  # Estandariza nombres de columnas
-
-    view = py3Dmol.view(width=920, height=620)  # Visor más grande para acomodar tres estructuras
-
-    # Añade cada estructura como un modelo independiente en el visor
-    # py3Dmol indexa los modelos por orden de inserción (0, 1, 2, ...)
-    for model_index, (gene, pdb_text) in enumerate(aligned_models.items()):
-        view.addModel(pdb_text, "pdb")  # Añade el texto PDB del gen actual al visor
-
-        # Representación en cinta con el color canónico del gen y ligera transparencia
+    aligned_models = _aligned_pdb_texts(pdb_paths_dict, chains=chains)
+    chains = chains or {}
+ 
+    if hotspot_data is None:
+        hotspot_data = pd.DataFrame(columns=["gene", "uniprot_position"])
+    hotspot_data = _normalize_hotspot_data(hotspot_data)
+ 
+    view = py3Dmol.view(width=920, height=620)
+ 
+    # 1) Carga todos los modelos primero
+    for pdb_text in aligned_models.values():
+        view.addModel(pdb_text, "pdb")
+ 
+    # 2) Limpia de golpe el estilo de líneas por defecto de TODOS los modelos
+    view.setStyle({}, {})
+ 
+    # 3) Aplica el estilo visible modelo a modelo
+    legend_entries = []
+    for model_index, gene in enumerate(aligned_models.keys()):
+        gene_chain = chains.get(gene, "A")
+        gene_color = GENE_COLORS.get(gene, "lightgray")
+        legend_entries.append((gene, gene_color))
+ 
         view.setStyle(
-            {"model": model_index},  # Selector: solo afecta a este modelo
-            {"cartoon": {"color": GENE_COLORS.get(gene, "lightgray"), "opacity": 0.72}},  # Cinta semitransparente
+            {"model": model_index, "chain": gene_chain},
+            {"cartoon": {"color": gene_color, "opacity": opacity}},
         )
-
-        # Ligandos en varillas de carbono verde (igual que en view_3d_with_hotspots)
         view.addStyle(
-            {"model": model_index, "resn": LIGAND_RESNAMES},  # Selector: ligandos de este modelo
-            {"stick": {"colorscheme": "greenCarbon"}},        # Varillas con esquema de carbono verde
+            {"model": model_index, "chain": gene_chain, "resn": LIGAND_RESNAMES},
+            {"stick": {"colorscheme": "greenCarbon"}},
         )
-
-        # Marca los hotspots de este gen con esferas del color canónico del gen
-        gene_hotspots = hotspot_data.loc[hotspot_data["gene"].eq(gene)]  # Filtra hotspots de este gen
-        for row in gene_hotspots.itertuples():  # Itera sobre los hotspots del gen actual
+ 
+        gene_hotspots = (
+            hotspot_data.loc[hotspot_data["gene"].eq(gene)]
+            if "gene" in hotspot_data.columns
+            else hotspot_data.iloc[0:0]
+        )
+        for row in gene_hotspots.itertuples():
             view.addStyle(
-                {"model": model_index, "chain": "A", "resi": int(row.uniprot_position)},  # Selector de residuo
-                {"sphere": {"color": GENE_COLORS.get(gene, "red"), "radius": 0.85}},      # Esfera de radio uniforme
+                {"model": model_index, "chain": gene_chain, "resi": int(row.uniprot_position)},
+                {"cartoon": {"color": hotspot_color}},
             )
+ 
+    if not hotspot_data.empty:
+        legend_entries.append(("Hotspot", hotspot_color))
+    _add_legend(view, legend_entries)
+ 
+    if show_labels and not hotspot_data.empty:
+        reference_gene = next(iter(aligned_models))
+        reference_chain = chains.get(reference_gene, "A")
+        _add_position_labels(
+            view, model_index=0, chain=reference_chain,
+            positions=hotspot_data["uniprot_position"].unique(),
+            border_color=hotspot_color,
+        )
+ 
+    view.zoomTo()
+ 
+    output_html = Path(output_html)
+    output_html.parent.mkdir(parents=True, exist_ok=True)
+    view.write_html(str(output_html))
+    return output_html, _OfflineView(view)
 
-    view.zoomTo()  # Centra el zoom sobre todos los modelos cargados
 
-    output_html = Path(output_html)                        # Convierte a objeto Path
-    output_html.parent.mkdir(parents=True, exist_ok=True)  # Crea el directorio si no existe
-    view.write_html(str(output_html))  # Exporta el visor comparativo como HTML auto-contenido
-    return output_html, _OfflineView(view)  # Devuelve la ruta del HTML y un wrapper offline para visualización inline
+def compare_states_3d(gene, output_html, gtp_pdb=None, gdp_pdb=None, gtp_chain=None, gdp_chain=None, hotspot_data=None, gtp_color="#2166AC", gdp_color="#8C8C8C", hotspot_color="#BE61E6", show_labels=True):
 
+    """
+    Superpone las conformaciones GTP (activa) y GDP (inactiva) de UN MISMO
+    parálogo RAS sobre los átomos Cα del dominio G (residuos 1-166), para
+    visualizar el desplazamiento conformacional de Switch I/II asociado al
+    ciclo de activación/inactivación de la GTPasa.
+ 
+    Si no se especifican gtp_pdb/gdp_pdb/gtp_chain/gdp_chain, se toman de
+    STRUCTURE_REGISTRY[gene], que ya contiene tus pares validados.
+ 
+    El emparejamiento de átomos Cα para la superposición se hace por número
+    de residuo (ver _aligned_pdb_texts), por lo que la comparación es robusta
+    aunque una de las dos estructuras tenga residuos ausentes (p. ej. 5UK9
+    carece de backbone en 62-64).
+ 
+    Args:
+        gene (str): 'KRAS', 'HRAS' o 'NRAS'.
+        output_html (str | Path): ruta del fichero HTML de salida.
+        gtp_pdb, gdp_pdb (str | Path | None): id PDB o ruta directa. None →
+            se toma de STRUCTURE_REGISTRY[gene].
+        gtp_chain, gdp_chain (str | None): cadena de cada estructura. None →
+            se toma de STRUCTURE_REGISTRY[gene].
+        hotspot_data (pd.DataFrame | None): hotspots a marcar (columnas
+            'gene' y 'uniprot_position'); se filtra automáticamente por
+            `gene` si la columna existe. Opcional.
+        gtp_color, gdp_color (str): colores de cinta para cada estado.
+ 
+    Returns:
+        tuple[Path, py3Dmol.view]: ruta al HTML y el visor (usar como última
+            expresión de la celda de Jupyter para verlo inline con zoom/rotación).
+    """
+    registry_entry = STRUCTURE_REGISTRY.get(gene, {})
+ 
+    gtp_pdb = gtp_pdb or registry_entry.get("GTP", {}).get("pdb_id")
+    gdp_pdb = gdp_pdb or registry_entry.get("GDP", {}).get("pdb_id")
+    gtp_chain = gtp_chain or registry_entry.get("GTP", {}).get("chain", "A")
+    gdp_chain = gdp_chain or registry_entry.get("GDP", {}).get("chain", "A")
+ 
+    if gtp_pdb is None or gdp_pdb is None:
+        raise ValueError(
+            f"No hay estructuras GTP/GDP para '{gene}' ni en los argumentos "
+            f"ni en STRUCTURE_REGISTRY."
+        )
+ 
+    pdb_specs = {"GTP": gtp_pdb, "GDP": gdp_pdb}
+    chains = {"GTP": gtp_chain, "GDP": gdp_chain}
+    aligned = _aligned_pdb_texts(pdb_specs, chains=chains)
+ 
+    state_colors = {"GTP": gtp_color, "GDP": gdp_color}
+    state_opacity = {"GTP": 0.85, "GDP": 0.55}
+    state_ligand_scheme = {"GTP": "greenCarbon", "GDP": "grayCarbon"}
+    state_labels = {"GTP": "GTP (activa)", "GDP": "GDP (inactiva)"}
+ 
+    view = py3Dmol.view(width=820, height=580)
+ 
+    # 1) Carga ambos modelos
+    for pdb_text in aligned.values():
+        view.addModel(pdb_text, "pdb")
+ 
+    # 2) Limpia el estilo de líneas por defecto de ambos modelos
+    view.setStyle({}, {})
+ 
+    if hotspot_data is not None:
+        hotspot_data = _normalize_hotspot_data(hotspot_data)
+        if "gene" in hotspot_data.columns:
+            hotspot_data = hotspot_data.loc[hotspot_data["gene"].eq(gene)]
+ 
+    # 3) Aplica el estilo visible modelo a modelo
+    for model_index, state in enumerate(aligned.keys()):
+        state_chain = chains[state]
+ 
+        view.setStyle(
+            {"model": model_index, "chain": state_chain},
+            {"cartoon": {"color": state_colors[state], "opacity": state_opacity[state]}},
+        )
+        view.addStyle(
+            {"model": model_index, "chain": state_chain, "resn": LIGAND_RESNAMES},
+            {"stick": {"colorscheme": state_ligand_scheme[state]}},
+        )
+ 
+        if hotspot_data is not None:
+            for row in hotspot_data.itertuples():
+                view.addStyle(
+                    {"model": model_index, "chain": state_chain, "resi": int(row.uniprot_position)},
+                    {"cartoon": {"color": hotspot_color}},
+                )
+ 
+    legend_entries = [(state_labels[s], state_colors[s]) for s in aligned.keys()]
+    if hotspot_data is not None and not hotspot_data.empty:
+        legend_entries.append(("Hotspot", hotspot_color))
+    _add_legend(view, legend_entries)
+ 
+    if show_labels and hotspot_data is not None and not hotspot_data.empty:
+        reference_state = next(iter(aligned))  # "GTP", primero en pdb_specs
+        _add_position_labels(
+            view, model_index=0, chain=chains[reference_state],
+            positions=hotspot_data["uniprot_position"].unique(),
+            border_color=hotspot_color,
+        )
+ 
+    view.zoomTo()
+ 
+    output_html = Path(output_html)
+    output_html.parent.mkdir(parents=True, exist_ok=True)
+    view.write_html(str(output_html))
+    return output_html, _OfflineView(view)
+ 
+
+
+def compare_isoforms_3d(state, output_html, hotspot_data=None, genes=("KRAS", "HRAS", "NRAS"), pdb_paths=None, chains=None, hotspot_color="#BE61E6", show_labels=True):
+    
+    """
+    Superpone la MISMA conformación (GTP o GDP) de los tres parálogos RAS.
+ 
+    Es el complemento de compare_states_3d: esa función fija el gen y compara
+    sus dos estados; esta función fija el estado y compara los tres genes
+    entre sí (p. ej. las tres estructuras GTP superpuestas, y por separado
+    las tres GDP), reutilizando la superposición estructural ya implementada
+    en comparative_3d_view.
+ 
+    Si no se especifican pdb_paths/chains, se construyen desde
+    STRUCTURE_REGISTRY para el `state` indicado.
+ 
+    Args:
+        state (str): 'GTP' o 'GDP'.
+        output_html (str | Path): ruta del fichero HTML de salida.
+        hotspot_data (pd.DataFrame | None): hotspots a marcar (columnas
+            'gene' y 'uniprot_position'). Opcional.
+        genes (tuple[str]): genes a incluir; el primero es la referencia fija
+            de la superposición.
+        pdb_paths (dict[str, str|Path] | None): {gen: id_pdb o ruta}. None →
+            se construye desde STRUCTURE_REGISTRY[gen][state].
+        chains (dict[str, str] | None): {gen: cadena}. None → se construye
+            desde STRUCTURE_REGISTRY[gen][state].
+ 
+    Returns:
+        tuple[Path, py3Dmol.view]: ruta al HTML y el visor (usar como última
+            expresión de la celda de Jupyter).
+    """
+    if pdb_paths is None:
+        pdb_paths = {gene: STRUCTURE_REGISTRY[gene][state]["pdb_id"] for gene in genes}
+    if chains is None:
+        chains = {gene: STRUCTURE_REGISTRY[gene][state].get("chain", "A") for gene in genes}
+ 
+    return comparative_3d_view(
+        pdb_paths, hotspot_data, output_html, chains=chains,
+        hotspot_color=hotspot_color, show_labels=show_labels, opacity=0.88
+    )
+
+
+def verify_structure_registry(registry=None, genes=("KRAS", "HRAS", "NRAS"),
+                               states=("GTP", "GDP")):
+    """
+    Comprueba que las estructuras/cadenas configuradas en STRUCTURE_REGISTRY
+    son las que realmente esperas, ANTES de generar ninguna figura 3D.
+ 
+    Por cada combinación gen/estado verifica:
+      - Que el fichero PDB existe en data/external/pdb/ (o donde lo tengas).
+      - Que la cadena indicada tiene residuos Cα en el dominio G (1-166) —
+        un número muy bajo o cero suele indicar que la cadena está mal
+        (p. ej. usar "A" en una estructura donde la cadena real es "B").
+      - Que el ligando presente en esa cadena es coherente con el estado
+        declarado: GTP espera GTP/GNP/GCP (análogos no hidrolizables
+        incluidos); GDP espera GDP. Si no coincide, probablemente hay un
+        PDB ID mal asignado en el registro (p. ej. un "GTP" que en
+        realidad es la forma GDP-bound de esa estructura).
+ 
+    Args:
+        registry (dict | None): registro a comprobar. None → STRUCTURE_REGISTRY.
+        genes (tuple[str]): genes a comprobar.
+        states (tuple[str]): estados a comprobar.
+ 
+    Returns:
+        pd.DataFrame: una fila por combinación gen/estado, con columnas
+            'gene', 'state', 'pdb_id', 'chain', 'file_found',
+            'ca_domain_g' (nº de residuos Cα encontrados en 1-166),
+            'ligands_in_chain', 'ligand_matches_state'.
+    """
+    registry = registry or STRUCTURE_REGISTRY
+    parser = PDBParser(QUIET=True)
+ 
+    expected_ligands = {
+        "GTP": {"GTP", "GNP", "GCP"},  # incluye análogos no hidrolizables
+        "GDP": {"GDP"},
+    }
+ 
+    rows = []
+    for gene in genes:
+        for state in states:
+            entry = registry.get(gene, {}).get(state, {})
+            pdb_id = entry.get("pdb_id")
+            chain_id = entry.get("chain", "A")
+ 
+            row = {
+                "gene": gene, "state": state, "pdb_id": pdb_id, "chain": chain_id,
+                "file_found": False, "ca_domain_g": 0,
+                "ligands_in_chain": [], "ligand_matches_state": None,
+            }
+ 
+            if pdb_id is None:
+                rows.append(row)
+                continue
+ 
+            pdb_path = _resolve_pdb_path(pdb_id)
+            row["file_found"] = pdb_path.exists()
+            if not row["file_found"]:
+                rows.append(row)
+                continue
+ 
+            structure = parser.get_structure(pdb_id, str(pdb_path))
+            model = next(structure.get_models())
+ 
+            if chain_id not in model:
+                rows.append(row)
+                continue
+ 
+            row["ca_domain_g"] = len(_ca_atoms(model, chain=chain_id))
+ 
+            ligands_found = sorted({
+                residue.resname
+                for residue in model[chain_id]
+                if residue.resname in LIGAND_RESNAMES
+            })
+            row["ligands_in_chain"] = ligands_found
+            row["ligand_matches_state"] = bool(set(ligands_found) & expected_ligands.get(state, set()))
+ 
+            rows.append(row)
+ 
+    return pd.DataFrame(rows)
 
 # ===========================================================================
 # Funciones auxiliares internas (prefijo _ indica uso privado al módulo)
@@ -770,120 +1004,192 @@ def _metric_color(value, max_value):
     return f"#{red:02x}4c{blue:02x}"  # Formato '#RRGGBB'; :02x garantiza dos dígitos hex siempre
 
 
-def _aligned_pdb_texts(pdb_paths_dict):
+def _aligned_pdb_texts(pdb_paths_dict, chains=None):
     """
-    Lee las estructuras PDB de los tres parálogos RAS, las superpone usando el
-    algoritmo de mínimos cuadrados sobre átomos Cα del dominio G (residuos 1–166),
-    y devuelve el texto PDB de cada estructura ya transformada.
-
-    **Bio.PDB.Superimposer** implementa el algoritmo de Kabsch (1976) para encontrar
-    la rotación y traslación óptimas que minimizan el RMSD entre dos conjuntos de
-    átomos equivalentes. Se usa el primer gen del diccionario como estructura de
-    referencia fija; los demás se transforman (rotan y trasladan) para maximizar la
-    superposición.
-
-    **Limitación a residuos 1–166:** El dominio G catalítico compartido por KRAS,
-    HRAS y NRAS comprende los residuos 1–166. Los residuos 167–189 corresponden al
-    hipervariable C-terminal (HVR), que difiere mucho entre parálogos y no debe
-    incluirse en la superposición para evitar sesgar la alineación del núcleo
-    conservado.
-
-    Se requieren al menos 10 átomos Cα comunes para que la superposición sea
-    estadísticamente válida (n_atoms >= 10).
-
-    **StringIO + PDBIO:**
-    PDBIO es la clase de Biopython para escribir estructuras PDB. Normalmente escribe
-    a disco, pero aquí se usa un buffer StringIO (fichero de texto en memoria) para
-    obtener el texto PDB sin crear ficheros temporales. Esto evita contaminación del
-    sistema de ficheros y es más rápido para estructuras en memoria.
-
+    Lee estructuras PDB (de distintos parálogos, o de distintos estados de un
+    mismo parálogo), las superpone sobre los átomos Cα del dominio G
+    (residuos 1-166) usando el algoritmo de Kabsch, y devuelve el texto PDB
+    de cada una ya transformada.
+ 
+    El primer elemento de `pdb_paths_dict` (en orden de inserción) se usa
+    como referencia fija; los demás se rotan/trasladan para superponerse a
+    ella. El emparejamiento de átomos Cα se hace por número de residuo
+    (intersección de residuos presentes en ambas estructuras, ordenados),
+    no por posición en la lista — esto evita desplazamientos silenciosos
+    cuando una estructura tiene huecos de backbone (p. ej. 5UK9 en 62-64).
+ 
+    Se requieren al menos 10 residuos Cα comunes para considerar la
+    superposición válida; si no se alcanza, se emite un warning y esa
+    estructura se deja sin transformar (se conserva su orientación original).
+ 
     Args:
-        pdb_paths_dict (dict[str, str | Path]): Diccionario {gen: ruta_pdb} con las
-            rutas a los ficheros PDB de los parálogos. El primer gen en orden de
-            inserción será la referencia de superposición.
-
+        pdb_paths_dict (dict[str, str | Path]): {etiqueta: id_pdb o ruta}.
+            La etiqueta puede ser un nombre de gen ('KRAS') o un estado
+            ('GTP'), según el caso de uso.
+        chains (dict[str, str] | None): {etiqueta: cadena}. None o etiqueta
+            ausente → cadena "A" por defecto.
+ 
     Returns:
-        dict[str, str]: Diccionario {gen: texto_pdb} con el contenido PDB de cada
-            estructura en las coordenadas alineadas.
+        dict[str, str]: {etiqueta: texto_pdb} con el contenido PDB de cada
+            estructura en las coordenadas ya alineadas.
     """
-    parser = PDBParser(QUIET=True)  # Inicializa el parser de PDB; QUIET=True suprime advertencias menores
-
-    # Lee todas las estructuras PDB y las almacena en un diccionario {gen: Structure}
+    chains = chains or {}
+    parser = PDBParser(QUIET=True)
+ 
     structures = {
-        gene: parser.get_structure(gene, str(path))  # str(path) por compatibilidad con versiones antiguas de Biopython
-        for gene, path in pdb_paths_dict.items()
+        label: parser.get_structure(label, str(_resolve_pdb_path(path)))
+        for label, path in pdb_paths_dict.items()
     }
-
-    reference_gene = next(iter(structures))  # Primer gen del diccionario → referencia fija de superposición
-
-    # Obtiene el primer modelo de la estructura de referencia (PDB puede tener múltiples modelos NMR)
-    reference_model = next(structures[reference_gene].get_models())
-
-    # Extrae los átomos Cα del dominio G (residuos 1–166, cadena A) de la referencia
-    reference_atoms = _ca_atoms(reference_model)
-
-    aligned = {}  # Diccionario de salida: {gen: texto_pdb_alineado}
-
-    for gene, structure in structures.items():
-        model = next(structure.get_models())  # Primer modelo de la estructura actual
-
-        if gene != reference_gene:  # La referencia no se transforma; solo los demás genes
-            mobile_atoms = _ca_atoms(model)  # Átomos Cα del dominio G de la estructura móvil
-
-            # Usa el mínimo de átomos disponibles entre referencia y móvil para el par equivalente
-            n_atoms = min(len(reference_atoms), len(mobile_atoms))
-
-            if n_atoms >= 10:  # Mínimo estadístico: al menos 10 átomos para una superposición válida
-                superimposer = Superimposer()  # Inicializa el superimposor (algoritmo de Kabsch)
-                # set_atoms define los pares de átomos equivalentes: referencia[:n] ↔ móvil[:n]
-                superimposer.set_atoms(reference_atoms[:n_atoms], mobile_atoms[:n_atoms])
-                # apply aplica la rotación/traslación calculada a TODOS los átomos del modelo móvil
+ 
+    reference_label = next(iter(structures))
+    reference_model = next(structures[reference_label].get_models())
+    reference_chain = chains.get(reference_label, "A")
+    reference_atoms = _ca_atoms(reference_model, chain=reference_chain)
+ 
+    aligned = {}
+ 
+    for label, structure in structures.items():
+        model = next(structure.get_models())
+        label_chain = chains.get(label, "A")
+ 
+        if label != reference_label:
+            mobile_atoms = _ca_atoms(model, chain=label_chain)
+ 
+            # Solo los residuos presentes en AMBAS estructuras, ordenados
+            # por número de residuo (no por posición en la lista).
+            common_residues = sorted(set(reference_atoms) & set(mobile_atoms))
+ 
+            if len(common_residues) >= 10:
+                ref_subset = [reference_atoms[r] for r in common_residues]
+                mob_subset = [mobile_atoms[r] for r in common_residues]
+ 
+                superimposer = Superimposer()
+                superimposer.set_atoms(ref_subset, mob_subset)
                 superimposer.apply(list(model.get_atoms()))
-
-        # Serializa la estructura transformada a texto PDB usando un buffer en memoria.
-        # StringIO actúa como un fichero de texto virtual (sin E/S en disco).
+            else:
+                import warnings
+                warnings.warn(
+                    f"Superposición de '{label}' (cadena {label_chain}) sobre "
+                    f"'{reference_label}' (cadena {reference_chain}) omitida: "
+                    f"solo {len(common_residues)} residuos Cα comunes en el "
+                    f"dominio G (<10). Revisa las cadenas seleccionadas."
+                )
+ 
         handle = StringIO()
-        io = PDBIO()             # Instancia el escritor de PDB de Biopython
-        io.set_structure(model)  # Asocia el modelo (ya transformado) al escritor
-        io.save(handle)          # Escribe el PDB en el buffer de texto en memoria
+        io = PDBIO()
+        io.set_structure(model)
+        io.save(handle)
+ 
+        aligned[label] = handle.getvalue()
+ 
+    return aligned
 
-        aligned[gene] = handle.getvalue()  # Extrae el texto PDB completo del buffer
 
-    return aligned  # Devuelve {gen: texto_pdb} para todos los parálogos en coordenadas alineadas
-
-
-def _ca_atoms(model):
+def _ca_atoms(model, chain="A"):
     """
-    Extrae los átomos Cα (carbono alfa) de la cadena A de un modelo PDB,
-    limitados a los residuos 1–166 del dominio G catalítico de las proteínas RAS.
-
-    Solo se incluyen residuos HETATM=espacio en blanco (residuos estándar, no ligandos
-    ni moléculas de agua) que contengan el átomo 'CA'.
-
-    El límite 1–166 corresponde al dominio G (GTPase domain) que es estructuralmente
-    conservado entre KRAS, HRAS y NRAS (>85% identidad). Los residuos 167+ pertenecen
-    al linker y a la región hipervariable C-terminal, que tiene longitud y secuencia
-    muy distintas entre parálogos y no debe usarse para la superposición.
-
+    Extrae los átomos Cα de la cadena indicada de un modelo PDB, limitados a
+    los residuos 1-166 del dominio G catalítico de las proteínas RAS,
+    indexados por número de residuo.
+ 
+    Se devuelve un diccionario {num_residuo: átomo} en lugar de una lista
+    para poder emparejar átomos equivalentes ENTRE DOS ESTRUCTURAS POR
+    NÚMERO DE RESIDUO, no por posición en la lista. Esto es crítico cuando
+    una de las estructuras tiene residuos ausentes en el fichero PDB (p. ej.
+    5UK9 carece de backbone en 62-64): emparejar por posición desplazaría
+    todos los residuos posteriores al hueco y produciría una superposición
+    silenciosamente incorrecta.
+ 
     Args:
-        model (Bio.PDB.Model.Model): Modelo de una estructura Bio.PDB con al menos
-            la cadena 'A' presente.
-
+        model (Bio.PDB.Model.Model): Modelo de una estructura Bio.PDB.
+        chain (str): Identificador de cadena a usar (p. ej. "A" o "B"; KRAS-
+            GTP/5UK9 requiere "B").
+ 
     Returns:
-        list[Bio.PDB.Atom.Atom]: Lista de átomos Cα en orden de numeración secuencial,
-            filtrados al dominio G (residuos 1–166).
+        dict[int, Bio.PDB.Atom.Atom]: {número_residuo: átomo Cα}, restringido
+            al dominio G (residuos 1-166).
     """
-    atoms = []            # Lista acumuladora de átomos Cα válidos
-    chain = model["A"]    # Selecciona la cadena A (cadena principal en los PDB de RAS)
-
-    for residue in chain:  # Itera sobre todos los residuos de la cadena A
-        # residue.id es una tupla (hetfield, seqnum, icode).
-        # hetfield == " " (espacio) indica residuo de aminoácido estándar
-        # (los ligandos tienen hetfield == "H_XXX" y las aguas == "W").
-        # seqnum entre 1 y 166 restringe al dominio G conservado.
-        # "CA" in residue verifica que el residuo tiene átomo Cα (algunos residuos
-        # en extremos de cadena o con desorden pueden carecer de él).
+    atoms = {}
+    chain_obj = model[chain]
+ 
+    for residue in chain_obj:
         if residue.id[0] == " " and 1 <= residue.id[1] <= 166 and "CA" in residue:
-            atoms.append(residue["CA"])  # Añade el átomo Cα del residuo a la lista
+            atoms[residue.id[1]] = residue["CA"]
+ 
+    return atoms
 
-    return atoms  # Devuelve la lista de Cα del dominio G para superposición
+
+def _add_legend(view, entries, x_offset=20, y_start=20, y_step=24, font_size=13):
+    """
+    Añade una leyenda de color fija en la esquina superior izquierda del
+    visor 3D. A diferencia de una etiqueta normal de 3Dmol.js (que está
+    anclada a una posición 3D y se mueve/rota con la molécula), esta usa
+    `useScreen=True` para quedar fija en coordenadas de PANTALLA: no cambia
+    de sitio aunque rotes, hagas zoom o desplaces la vista. Es lo que
+    permite saber de un vistazo qué color corresponde a qué estructura
+    (p. ej. GTP vs GDP, o KRAS/HRAS/NRAS).
+ 
+    Args:
+        view (py3Dmol.view): visor sobre el que añadir la leyenda.
+        entries (list[tuple[str, str]]): pares (etiqueta, color_hex), en el
+            orden en que se apilan verticalmente.
+        x_offset, y_start, y_step (int): posición y espaciado en píxeles.
+        font_size (int): tamaño de fuente de la leyenda.
+    """
+    for i, (label, color) in enumerate(entries):
+        view.addLabel(
+            label,
+            {
+                "position": {"x": 0, "y": 0, "z": 0},
+                "useScreen": True,
+                "screenOffset": {"x": x_offset, "y": y_start + i * y_step},
+                "fontColor": "white",
+                "backgroundColor": color,
+                "backgroundOpacity": 0.85,
+                "fontSize": font_size,
+                "borderThickness": 0,
+                "inFront": True,
+            },
+        )
+
+
+def _add_position_labels(view, model_index, chain, positions, label_color="black", label_bg="white", border_color="#333333", font_size=11):
+    """
+    Añade una etiqueta de texto con el nombre de cada hotspot (p. ej. "G12",
+    "Q61", tomado de HOTSPOTS) ANCLADA A LA POSICIÓN 3D REAL de ese residuo.
+ 
+    A diferencia de _add_legend (fija en pantalla, no se mueve), estas
+    etiquetas SÍ giran y se desplazan junto con la molécula al rotar o
+    hacer zoom, porque en vez de darle una coordenada de pantalla se le da
+    una selección de átomos (chain + resi) y 3Dmol.js calcula la posición
+    a partir de ahí.
+ 
+    Se añade una única etiqueta por posición (no una por modelo/estructura),
+    anclada al modelo de referencia (`model_index`), para no duplicar el
+    mismo texto varias veces cuando hay varias estructuras superpuestas casi
+    en el mismo sitio.
+ 
+    Args:
+        view (py3Dmol.view): visor sobre el que añadir las etiquetas.
+        model_index (int): índice del modelo al que anclar las etiquetas
+            (normalmente el primero/de referencia de la superposición).
+        chain (str): cadena de ese modelo.
+        positions (Iterable[int]): posiciones UniProt de los hotspots.
+        label_color, label_bg, border_color (str): estilo del texto.
+        font_size (int): tamaño de fuente.
+    """
+    for position in sorted({int(p) for p in positions}):
+        label_text = HOTSPOTS.get(position, str(position))
+        view.addLabel(
+            label_text,
+            {
+                "fontColor": label_color,
+                "backgroundColor": label_bg,
+                "backgroundOpacity": 0.85,
+                "borderColor": border_color,
+                "borderThickness": 1.0,
+                "fontSize": font_size,
+                "inFront": True,
+                "screenOffset": {"x": 0, "y": -16},
+            },
+            {"model": model_index, "chain": chain, "resi": position},
+        )
