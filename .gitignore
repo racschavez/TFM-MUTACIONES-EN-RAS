@@ -15,6 +15,9 @@ venv/
 # Jupyter
 .ipynb_checkpoints/
 
+# Documentos de ayuda
+docs/primeros_pasos.md
+
 # Datos en bruto (NO versionar COSMIC)
 data/raw/*
 !data/raw/.gitkeep
